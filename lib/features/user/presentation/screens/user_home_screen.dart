@@ -22,13 +22,19 @@ class UserHomeScreen extends StatefulWidget {
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
-  int _currentIndex = 0;
+  int _activeTab = 0;
   final DeviceController _deviceController = DeviceController();
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchCtrl = TextEditingController();
 
-  String _selectedCategory = 'Tất cả';
-  int _selectedAgeFilter = 0; // 0: Tất cả, 1: 3-5 tuổi, 2: 6-10 tuổi, 3: 11+ tuổi
-  final Set<int> _favoriteDeviceIds = {};
+  String _activeCategory = 'Tất cả';
+  int _ageGroupIndex = 0;
+  final Set<int> _bookmarkedIds = {};
+
+  // Trạng thái Quản lý Điện thoại Trẻ em (Parental Control)
+  bool _studyModeLock = true;
+  bool _bedtimeAutoLock = true;
+  bool _safeZoneAlert = true;
+  double _dailyScreenLimitMinutes = 90;
 
   @override
   void initState() {
@@ -38,22 +44,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogout() async {
-    final confirmed = await ConfirmDialog.show(
+  Future<void> _confirmAndLogout() async {
+    final ok = await ConfirmDialog.show(
       context: context,
-      title: 'Đăng xuất tài khoản',
-      content: 'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng Child Devices?',
+      title: 'Rời khỏi Cổng Phụ Huynh',
+      content: 'Bạn có muốn đăng xuất khỏi ứng dụng Khang KidSafe không?',
       confirmText: 'Đăng xuất',
     );
-
-    if (!confirmed || !mounted) return;
+    if (!ok || !mounted) return;
 
     await widget.authController.logout();
-
     if (!mounted) return;
 
     Navigator.pushAndRemoveUntil(
@@ -65,144 +69,920 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  void _showDeviceDetailSheet(Device device) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.75,
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: _buildFamilyAppBar(),
+      body: IndexedStack(
+        index: _activeTab,
+        children: [
+          _buildParentalControlHubTab(),
+          _buildDeviceStoreTab(),
+          CallHubWidget(authController: widget.authController),
+          SmartTranslatorScreen(
+            isEmbeddedInTab: true,
+            isActiveTab: _activeTab == 3,
+          ),
+          _buildFamilySettingsTab(),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _activeTab,
+        onDestinationSelected: (idx) => setState(() => _activeTab = idx),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.phonelink_lock_outlined),
+            selectedIcon: Icon(Icons.phonelink_lock_rounded, color: AppColors.primaryDark),
+            label: 'Quản lý Bé',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.storefront_outlined),
+            selectedIcon: Icon(Icons.storefront_rounded, color: AppColors.primaryDark),
+            label: 'Kho Thiết Bị',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.videocam_outlined),
+            selectedIcon: Icon(Icons.videocam_rounded, color: AppColors.primaryDark),
+            label: 'Gọi Gia Đình',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.translate_outlined),
+            selectedIcon: Icon(Icons.translate_rounded, color: AppColors.primaryDark),
+            label: 'Dịch Học Tập',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.family_restroom_outlined),
+            selectedIcon: Icon(Icons.family_restroom_rounded, color: AppColors.primaryDark),
+            label: 'Gia Đình',
+          ),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildFamilyAppBar() {
+    final user = widget.authController.currentUser;
+    final fullName = user?.fullName ?? 'Hồng Hoàng Khang';
+
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.shield_rounded, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Gia đình $fullName',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Text(
+                  'Khang KidSafe • Giám sát & Bảo vệ Trẻ em',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: AppColors.primaryDark, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.primarySoft,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.verified_rounded, size: 14, color: AppColors.primaryDark),
+              SizedBox(width: 4),
+              Text(
+                'PHỤ HUYNH',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          tooltip: 'Đăng xuất',
+          icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
+          onPressed: _confirmAndLogout,
+        ),
+      ],
+    );
+  }
+
+  // ================= TAB 0: TRUNG TÂM QUẢN LÝ ĐIỆN THOẠI & ĐỊNH VỊ BÉ =================
+  Widget _buildParentalControlHubTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Hero Card: Trạng thái An toàn Gia đình
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withAlpha(55),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F4F5),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFD4D4D8)),
+                      color: Colors.white.withAlpha(40),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.devices_rounded, color: Color(0xFF09090B), size: 36),
+                    child: const Icon(Icons.gps_fixed_rounded, color: Colors.white, size: 26),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
+                  const SizedBox(width: 12),
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          device.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                          '2 Thiết Bị Trẻ Em Đang Trong Vùng An Toàn',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 3),
                         Text(
-                          'Thương hiệu: ${device.brand ?? "Chính hãng"} | Danh mục: ${device.category}',
-                          style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${device.averageRating > 0 ? device.averageRating : 4.8} (${device.reviewCount > 0 ? device.reviewCount : 24} đánh giá từ phụ huynh)',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                            ),
-                          ],
+                          'Tín hiệu GPS vệ tinh ổn định • Cập nhật 10 giây trước',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const Divider(height: 28),
-              const Text(
-                'Chứng nhận An toàn cho trẻ em:',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              const SizedBox(height: 14),
+              Row(
                 children: [
-                  _buildSafetyBadge('Bức xạ an toàn CE', Icons.health_and_safety_outlined),
-                  _buildSafetyBadge('Phù hợp lứa tuổi ${device.minAge}-${device.maxAge} tuổi', Icons.child_care_rounded),
-                  _buildSafetyBadge('Chống nước IP67', Icons.water_drop_outlined),
-                  _buildSafetyBadge('Định vị SOS tức thì', Icons.location_on_outlined),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.primaryDark,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.share_location_rounded, size: 18),
+                      label: const Text('Chia sẻ Vị trí Đón Bé', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                      onPressed: _openGpsAndQrSheet,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                      label: const Text('Quét QR Ghép Đôi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                      onPressed: _openGpsAndQrSheet,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Mô tả sản phẩm:',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    device.description ??
-                        'Thiết bị thông minh chuyên dụng bảo vệ và đồng hành cùng bé yêu. Giúp phụ huynh an tâm theo dõi vị trí, liên lạc hai chiều và nhận cảnh báo khẩn cấp khi con ra khỏi vùng an toàn.',
-                    style: const TextStyle(fontSize: 13.5, color: Color(0xFF475569), height: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        // Bảng Điều Khiển Điện Thoại Từ Xa (Screen Time & App Lock)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const Row(
                     children: [
-                      const Text('Giá ưu đãi phụ huynh', style: TextStyle(fontSize: 11.5, color: Colors.grey)),
+                      Icon(Icons.app_blocking_rounded, color: AppColors.primary, size: 22),
+                      SizedBox(width: 8),
+                      Text(
+                        'Kiểm Soát Điện Thoại Của Bé Từ Xa',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySoft,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Text(
+                      'Giới hạn: ${_dailyScreenLimitMinutes.toInt()} phút/ngày',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Slider(
+                value: _dailyScreenLimitMinutes,
+                min: 30,
+                max: 180,
+                divisions: 6,
+                activeColor: AppColors.primary,
+                label: '${_dailyScreenLimitMinutes.toInt()} phút',
+                onChanged: (v) => setState(() => _dailyScreenLimitMinutes = v),
+              ),
+              const Divider(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                activeThumbColor: AppColors.primary,
+                value: _studyModeLock,
+                title: const Text('Chế độ Tập trung Học tập (Chặn Game & Mạng xã hội)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                subtitle: const Text('Chỉ cho phép ứng dụng Học tập, Dịch AI và Gọi cho Ba Mẹ', style: TextStyle(fontSize: 11.5)),
+                onChanged: (v) => setState(() => _studyModeLock = v),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                activeThumbColor: AppColors.primary,
+                value: _bedtimeAutoLock,
+                title: const Text('Tự động Khóa màn hình Giờ đi ngủ (21:30 - 06:00)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                subtitle: const Text('Bảo vệ giấc ngủ và thị lực của trẻ', style: TextStyle(fontSize: 11.5)),
+                onChanged: (v) => setState(() => _bedtimeAutoLock = v),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        const Text(
+          'DANH SÁCH THIẾT BỊ CỦA BÉ ĐANG KẾT NỐI',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            color: AppColors.textSecondary,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        _buildChildDeviceStatusCard(
+          childName: 'Bé Hoàng Khôi',
+          gradeInfo: '8 tuổi • Lớp 3A Trường Chu Văn An',
+          deviceTitle: 'Đồng Hồ Định Vị GPS Kiddo Watch Pro',
+          addressText: 'Khuôn viên Trường Tiểu học Chu Văn An (Bán kính an toàn 150m)',
+          batteryPercent: 88,
+          screenUsedText: 'Đã dùng 35 / ${_dailyScreenLimitMinutes.toInt()} phút hôm nay',
+          accentColor: AppColors.primary,
+        ),
+        const SizedBox(height: 14),
+
+        _buildChildDeviceStatusCard(
+          childName: 'Bé Bảo Ngọc',
+          gradeInfo: '5 tuổi • Lớp Lá Mầm Non Hoa Mai',
+          deviceTitle: 'Máy Tính Bảng Học Tập Samsung Kids Tab',
+          addressText: 'Nhà riêng Gia đình (Phòng học tầng 2 - Đang bật Chế độ Học tập)',
+          batteryPercent: 94,
+          screenUsedText: 'Đã dùng 20 / ${_dailyScreenLimitMinutes.toInt()} phút hôm nay',
+          accentColor: const Color(0xFF27272A),
+        ),
+        const SizedBox(height: 16),
+
+        // Quick AI Study Card
+        _buildQuickTranslatorBanner(),
+      ],
+    );
+  }
+
+  Widget _buildChildDeviceStatusCard({
+    required String childName,
+    required String gradeInfo,
+    required String deviceTitle,
+    required String addressText,
+    required int batteryPercent,
+    required String screenUsedText,
+    required Color accentColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withAlpha(14),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: accentColor.withAlpha(30),
+                child: Icon(Icons.face_retouching_natural_rounded, color: accentColor, size: 26),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      childName,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    ),
+                    Text(
+                      gradeInfo,
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.battery_charging_full_rounded, size: 14, color: AppColors.primaryDark),
+                    const SizedBox(width: 3),
+                    Text(
+                      '$batteryPercent%',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
+          Row(
+            children: [
+              Icon(Icons.watch_rounded, size: 16, color: accentColor),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  deviceTitle,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.location_on_rounded, size: 16, color: AppColors.success),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  addressText,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.timelapse_rounded, size: 16, color: AppColors.primary),
+              const SizedBox(width: 6),
+              Text(
+                screenUsedText,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.phone_in_talk_rounded, size: 16),
+                  label: const Text('Gọi Thoại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  onPressed: () {
+                    final slug = childName.toLowerCase().replaceAll(' ', '-');
+                    CallHubWidget.launchDirectCall(
+                      context: context,
+                      authController: widget.authController,
+                      roomName: 'kid-$slug',
+                      description: 'Đàm thoại 2 chiều với $childName ($deviceTitle)',
+                      callType: CallType.oneToOne,
+                      isAudioOnly: true,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.videocam_rounded, size: 17),
+                  label: const Text('Video Call', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  onPressed: () {
+                    final slug = childName.toLowerCase().replaceAll(' ', '-');
+                    CallHubWidget.launchDirectCall(
+                      context: context,
+                      authController: widget.authController,
+                      roomName: 'kid-$slug',
+                      description: 'Gọi Video trực tiếp với $childName ($deviceTitle)',
+                      callType: CallType.oneToOne,
+                      isAudioOnly: false,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: 'Báo Nhân viên Kỹ thuật hỗ trợ thiết bị này',
+                icon: const Icon(Icons.support_agent_rounded, color: AppColors.primaryDark),
+                onPressed: () {
+                  CallHubWidget.launchDirectCall(
+                    context: context,
+                    authController: widget.authController,
+                    roomName: 'phong-ho-tro-ky-thuat',
+                    description: 'Phụ huynh cần hỗ trợ thiết bị $deviceTitle của $childName',
+                    callType: CallType.support,
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickTranslatorBanner() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.auto_stories_rounded, color: AppColors.primary, size: 22),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Trợ Lý Học Tập AI Cùng Bé (Camera OCR & Dịch Giọng Nói)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13.5,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Chụp sách Tiếng Anh hoặc hướng dẫn sử dụng thiết bị để dịch sang Tiếng Việt và nghe phát âm chuẩn.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.camera_alt_rounded, size: 16),
+                  label: const Text('Quét Chữ Camera', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  onPressed: () => SmartTranslatorScreen.open(context, initialTabIndex: 0),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                  icon: const Icon(Icons.record_voice_over_rounded, size: 16),
+                  label: const Text('Dịch Hội Thoại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  onPressed: () => SmartTranslatorScreen.open(context, initialTabIndex: 1),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openGpsAndQrSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySoft,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.my_location_rounded, color: AppColors.primaryDark),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Chia Sẻ Vị Trí GPS & Mã Ghép Đôi QR',
+                      style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primarySoft),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Thông số Định vị Trực tiếp (API /api/Location):',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.primaryDark),
+                    ),
+                    SizedBox(height: 6),
+                    Text('• Tọa độ Phụ huynh: 10.776889° N, 106.700981° E', style: TextStyle(fontSize: 12.5)),
+                    Text('• Khoảng cách tới Bé Hoàng Khôi: 295m (Hướng Tây Bắc)', style: TextStyle(fontSize: 12.5)),
+                    Text('• Trạng thái vùng an toàn: Trong bán kính 150m (An toàn)', style: TextStyle(fontSize: 12.5)),
+                    Text('• Mã định danh QR / ShareCode: GPS-KHANG-8821', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.send_rounded, size: 18),
+                  label: const Text('Gửi Tọa Độ Điểm Đón Tới Thiết Bị Của Bé', style: TextStyle(fontWeight: FontWeight.w800)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        backgroundColor: AppColors.primaryDark,
+                        content: Text('Đã phát sóng tọa độ điểm đón (Mã: GPS-KHANG-8821) tới đồng hồ của bé!'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ================= TAB 1: CỬA HÀNG & TRA CỨU THIẾT BỊ TRẺ EM =================
+  Widget _buildDeviceStoreTab() {
+    return ListenableBuilder(
+      listenable: _deviceController,
+      builder: (context, _) {
+        final filtered = _deviceController.devices.where((d) {
+          if (_activeCategory != 'Tất cả' && d.category != _activeCategory) {
+            return false;
+          }
+          if (_ageGroupIndex == 1 && (d.minAge > 5 || d.maxAge < 3)) return false;
+          if (_ageGroupIndex == 2 && (d.minAge > 10 || d.maxAge < 6)) return false;
+          if (_ageGroupIndex == 3 && d.maxAge < 11) return false;
+
+          final q = _searchCtrl.text.trim().toLowerCase();
+          if (q.isNotEmpty) {
+            return d.name.toLowerCase().contains(q) ||
+                (d.brand?.toLowerCase().contains(q) ?? false);
+          }
+          return true;
+        }).toList();
+
+        return RefreshIndicator(
+          onRefresh: () => _deviceController.loadDevices(),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Search Box
+              TextField(
+                controller: _searchCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Tìm đồng hồ GPS, máy tính bảng học tập, camera...',
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
+                  suffixIcon: _searchCtrl.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() {});
+                          },
+                        )
+                      : null,
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
+
+              // Lọc theo độ tuổi của bé
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildAgeFilterPill('Mọi độ tuổi', 0),
+                    _buildAgeFilterPill('Mầm non (3-5 tuổi)', 1),
+                    _buildAgeFilterPill('Tiểu học (6-10 tuổi)', 2),
+                    _buildAgeFilterPill('THCS (11+ tuổi)', 3),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Lọc danh mục
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: ['Tất cả', ...Device.defaultCategories].map((cat) {
+                    final selected = _activeCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(
+                          cat,
+                          style: TextStyle(
+                            color: selected ? Colors.white : AppColors.textPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        selected: selected,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: Colors.white,
+                        onSelected: (_) => setState(() => _activeCategory = cat),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              if (_deviceController.isLoading && _deviceController.devices.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(36),
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                )
+              else if (filtered.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(36),
+                    child: Text('Không có thiết bị nào khớp bộ lọc'),
+                  ),
+                )
+              else
+                ...filtered.map(_buildStoreDeviceItem),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAgeFilterPill(String text, int idx) {
+    final active = _ageGroupIndex == idx;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(
+          text,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+            color: active ? AppColors.primaryDark : AppColors.textSecondary,
+          ),
+        ),
+        selected: active,
+        selectedColor: AppColors.primarySoft,
+        backgroundColor: Colors.white,
+        onSelected: (_) => setState(() => _ageGroupIndex = idx),
+      ),
+    );
+  }
+
+  Widget _buildStoreDeviceItem(Device device) {
+    final fav = _bookmarkedIds.contains(device.id);
+    return InkWell(
+      onTap: () => _openDeviceSpecSheet(device),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.watch_rounded, color: AppColors.primary, size: 30),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    device.name,
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Độ tuổi: ${device.minAge}-${device.maxAge} tuổi • ${device.brand ?? "Chính hãng"}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
                         '${device.price.toStringAsFixed(0)} đ',
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 15,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF09090B),
+                          color: AppColors.primaryDark,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primarySoft,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          device.category,
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryDark,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF09090B),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                fav ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                color: fav ? AppColors.accent : Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  if (fav) {
+                    _bookmarkedIds.remove(device.id);
+                  } else {
+                    _bookmarkedIds.add(device.id);
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openDeviceSpecSheet(Device device) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                device.name,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Thương hiệu: ${device.brand ?? "Kiddo"} • Model: ${device.modelNumber ?? "2026"} • Lứa tuổi: ${device.minAge}-${device.maxAge}',
+                style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+              ),
+              const Divider(height: 22),
+              Text(
+                device.description ?? 'Thiết bị thông minh hỗ trợ định vị GPS, gọi SOS và kiểm soát thời gian sử dụng màn hình cho trẻ em.',
+                style: const TextStyle(fontSize: 13.5, height: 1.45),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${device.price.toStringAsFixed(0)} VNĐ',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primaryDark,
                     ),
-                    icon: const Icon(Icons.shopping_bag_outlined),
-                    label: const Text('Tư vấn & Đặt mua', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add_link_rounded),
+                    label: const Text('Đăng ký Trang bị cho Bé'),
                     onPressed: () {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          backgroundColor: const Color(0xFF09090B),
-                          content: Text('Đã gửi yêu cầu tư vấn sản phẩm "${device.name}"'),
+                          backgroundColor: AppColors.primaryDark,
+                          content: Text('Đã gửi yêu cầu trang bị "${device.name}" cho bé!'),
                         ),
                       );
                     },
@@ -216,854 +996,32 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
-  Widget _buildSafetyBadge(String text, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFD4D4D8)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: const Color(0xFF09090B)),
-          const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontSize: 11.5, color: Color(0xFF09090B), fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: _buildUserAppBar(),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          _buildExploreCatalogTab(),
-          _buildKidsDevicesTab(),
-          CallHubWidget(authController: widget.authController),
-          SmartTranslatorScreen(
-            isEmbeddedInTab: true,
-            isActiveTab: _currentIndex == 3,
-          ),
-          _buildParentProfileTab(),
-        ],
-      ),
-      bottomNavigationBar: _buildUserBottomNav(),
-    );
-  }
-
-  PreferredSizeWidget _buildUserAppBar() {
-    final user = widget.authController.currentUser;
-    final name = user?.fullName.split(' ').last ?? 'Phụ Huynh';
-
-    return AppBar(
-      backgroundColor: Colors.white,
-      foregroundColor: AppColors.textPrimary,
-      elevation: 0.5,
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F4F5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.family_restroom_rounded, color: Color(0xFF09090B), size: 22),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Chào ba mẹ $name! 👋',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const Text(
-                  'Đồng hành an toàn cùng bé yêu',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F4F5),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFD4D4D8)),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.verified_rounded, size: 14, color: Color(0xFF09090B)),
-              SizedBox(width: 4),
-              Text(
-                'ROLE: USER',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF09090B),
-                ),
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          tooltip: 'Đăng xuất',
-          icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-          onPressed: _handleLogout,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserBottomNav() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0), width: 1)),
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF09090B),
-        unselectedItemColor: const Color(0xFF64748B),
-        type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5),
-        unselectedLabelStyle: const TextStyle(fontSize: 11.5),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_rounded),
-            label: 'Khám phá',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.child_care_rounded),
-            label: 'Bé & Thiết bị',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.phone_in_talk_rounded),
-            label: 'Gọi điện',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_enhance_rounded),
-            label: 'Dịch AI',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_rounded),
-            label: 'Gia đình',
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= TAB 0: KHÁM PHÁ THIẾT BỊ AN TOÀN CHO BÉ =================
-  Widget _buildExploreCatalogTab() {
-    return ListenableBuilder(
-      listenable: _deviceController,
-      builder: (context, _) {
-        final devices = _deviceController.devices.where((d) {
-          if (_selectedCategory != 'Tất cả' && d.category != _selectedCategory) {
-            return false;
-          }
-          if (_selectedAgeFilter == 1 && (d.minAge > 5 || d.maxAge < 3)) return false;
-          if (_selectedAgeFilter == 2 && (d.minAge > 10 || d.maxAge < 6)) return false;
-          if (_selectedAgeFilter == 3 && d.maxAge < 11) return false;
-
-          final q = _searchController.text.trim().toLowerCase();
-          if (q.isNotEmpty) {
-            return d.name.toLowerCase().contains(q) ||
-                (d.brand?.toLowerCase().contains(q) ?? false);
-          }
-          return true;
-        }).toList();
-
-        return RefreshIndicator(
-          onRefresh: () => _deviceController.loadDevices(),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Friendly Banner
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF09090B), Color(0xFF27272A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF09090B).withAlpha(40),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'An Tâm Từng Bước Chân Của Bé',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Đồng hồ định vị GPS, camera giấc ngủ và thiết bị học tập chuẩn quốc tế.',
-                            style: TextStyle(color: Colors.white, fontSize: 12, height: 1.3),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(35),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.shield_rounded, color: Colors.white, size: 32),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Trợ Lý Dịch Thuật AI (Camera OCR & Hội Thoại Realtime EN -> VI)
-              _buildAiTranslatorQuickCard(),
-              const SizedBox(height: 14),
-
-              // Search Bar
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Tìm thiết bị cho bé (đồng hồ, camera, máy tính...)',
-                  hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF09090B)),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                  ),
-                ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 14),
-
-              // Age Filter Chips
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildAgeChip('Mọi lứa tuổi', 0),
-                    _buildAgeChip('Mầm non (3-5 tuổi)', 1),
-                    _buildAgeChip('Tiểu học (6-10 tuổi)', 2),
-                    _buildAgeChip('Thiếu niên (11+ tuổi)', 3),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Category Filter Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    'Tất cả',
-                    ...Device.defaultCategories,
-                  ].map((cat) {
-                    final isSel = _selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(
-                          cat,
-                          style: TextStyle(
-                            color: isSel ? Colors.white : AppColors.textPrimary,
-                            fontSize: 12,
-                            fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
-                          ),
-                        ),
-                        selected: isSel,
-                        selectedColor: const Color(0xFF09090B),
-                        backgroundColor: Colors.white,
-                        onSelected: (_) => setState(() => _selectedCategory = cat),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Product Grid / List
-              if (_deviceController.isLoading && _deviceController.devices.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(color: Color(0xFF09090B)),
-                  ),
-                )
-              else if (devices.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.devices_other_rounded, size: 50, color: Colors.grey),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Chưa có thiết bị nào phù hợp với bộ lọc',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedCategory = 'Tất cả';
-                              _selectedAgeFilter = 0;
-                              _searchController.clear();
-                            });
-                          },
-                          child: const Text('Đặt lại bộ lọc'),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                ...devices.map((device) => _buildParentDeviceCard(device)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAgeChip(String label, int index) {
-    final isSel = _selectedAgeFilter == index;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(
-          label,
-          style: TextStyle(
-            color: isSel ? const Color(0xFF09090B) : AppColors.textSecondary,
-            fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-            fontSize: 11.5,
-          ),
-        ),
-        selected: isSel,
-        onSelected: (_) => setState(() => _selectedAgeFilter = index),
-        backgroundColor: Colors.white,
-        selectedColor: const Color(0xFFF4F4F5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: isSel ? const Color(0xFF09090B) : const Color(0xFFE2E8F0)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParentDeviceCard(Device device) {
-    final isFav = _favoriteDeviceIds.contains(device.id);
-
-    return InkWell(
-      onTap: () => _showDeviceDetailSheet(device),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(6),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F4F5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.devices_rounded, color: Color(0xFF09090B), size: 28),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    device.name,
-                    style: const TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Độ tuổi: ${device.minAge}-${device.maxAge} tuổi • ${device.category}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${device.price.toStringAsFixed(0)} đ',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF09090B),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF4F4F5),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'An toàn cho bé',
-                          style: TextStyle(
-                            color: Color(0xFF18181B),
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                color: isFav ? Colors.red : Colors.grey,
-                size: 22,
-              ),
-              onPressed: () {
-                setState(() {
-                  if (isFav) {
-                    _favoriteDeviceIds.remove(device.id);
-                  } else {
-                    _favoriteDeviceIds.add(device.id);
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ================= TAB 1: BÉ & THIẾT BỊ ĐANG GIÁM SÁT =================
-  Widget _buildKidsDevicesTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Kid 1
-        _buildKidMonitoringCard(
-          kidName: 'Bé Minh An',
-          kidAge: '7 tuổi - Lớp 2A',
-          deviceName: 'Đồng Hồ Định Vị Trẻ Em K2 Pro',
-          location: 'Trường Tiểu học Chu Văn An (Vùng an toàn)',
-          battery: '86%',
-          isSafe: true,
-          avatarColor: const Color(0xFF09090B),
-        ),
-        const SizedBox(height: 14),
-
-        // Kid 2
-        _buildKidMonitoringCard(
-          kidName: 'Bé Bông Nhi',
-          kidAge: '4 tuổi - Lớp Mầm',
-          deviceName: 'Camera Cảm Biến Giấc Ngủ SafeSleep',
-          location: 'Phòng ngủ bé (Tầng 2 - Bình thường)',
-          battery: 'Cắm nguồn 24/7',
-          isSafe: true,
-          avatarColor: const Color(0xFF27272A),
-        ),
-        const SizedBox(height: 20),
-
-        // Connect new device button
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: Color(0xFF09090B), width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF09090B)),
-          label: const Text(
-            'Quét mã QR kết nối thêm thiết bị cho bé',
-            style: TextStyle(color: Color(0xFF09090B), fontWeight: FontWeight.bold),
-          ),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Tính năng quét mã QR kết nối thiết bị đang sẵn sàng')),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKidMonitoringCard({
-    required String kidName,
-    required String kidAge,
-    required String deviceName,
-    required String location,
-    required String battery,
-    required bool isSafe,
-    required Color avatarColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(6),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: avatarColor.withAlpha(30),
-                child: Text(
-                  kidName.substring(0, 1),
-                  style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      kidName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                    Text(
-                      kidAge,
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F4F5),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: const [
-                    Icon(Icons.check_circle_rounded, color: Color(0xFF18181B), size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      'AN TOÀN',
-                      style: TextStyle(
-                        color: Color(0xFF09090B),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: 20),
-          Row(
-            children: [
-              const Icon(Icons.watch_rounded, size: 16, color: Color(0xFF09090B)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  deviceName,
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                ),
-              ),
-              Text(
-                'Pin: $battery',
-                style: const TextStyle(fontSize: 11.5, color: Colors.grey),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.place_rounded, size: 16, color: Color(0xFF18181B)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  location,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF27272A)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF09090B),
-                    side: const BorderSide(color: Color(0xFF09090B)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  icon: const Icon(Icons.phone_in_talk_rounded, size: 17),
-                  label: const Text('Gọi Thoại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  onPressed: () {
-                    final slug = kidName.toLowerCase().replaceAll(' ', '-');
-                    CallHubWidget.launchDirectCall(
-                      context: context,
-                      authController: widget.authController,
-                      roomName: 'kid-$slug',
-                      description: 'Gọi thoại 2 chiều tới $deviceName của $kidName',
-                      callType: CallType.oneToOne,
-                      isAudioOnly: true,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF09090B),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  icon: const Icon(Icons.video_call_rounded, size: 18),
-                  label: const Text('Gọi Video', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  onPressed: () {
-                    final slug = kidName.toLowerCase().replaceAll(' ', '-');
-                    CallHubWidget.launchDirectCall(
-                      context: context,
-                      authController: widget.authController,
-                      roomName: 'kid-$slug',
-                      description: 'Video Call tới $deviceName của $kidName',
-                      callType: CallType.oneToOne,
-                      isAudioOnly: false,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFFF1F5F9),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.support_agent_rounded, color: Color(0xFF18181B)),
-                tooltip: 'Gọi Staff hỗ trợ thiết bị này',
-                onPressed: () {
-                  CallHubWidget.launchDirectCall(
-                    context: context,
-                    authController: widget.authController,
-                    roomName: 'phong-ho-tro-ky-thuat',
-                    description: 'Phụ huynh cần hỗ trợ thiết bị $deviceName ($kidName)',
-                    callType: CallType.support,
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= TRỢ LÝ DỊCH CAMERA & HỘI THOẠI REALTIME (EN -> VI) =================
-  Widget _buildAiTranslatorQuickCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFD4D4D8)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF09090B).withAlpha(14),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F4F5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.translate_rounded,
-                  color: Color(0xFF09090B),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dịch Camera & Hội Thoại Realtime (Anh → Việt)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.5,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Giơ camera vào chữ Tiếng Anh để dịch hoặc phát âm đoạn hội thoại',
-                      style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF09090B),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: const Icon(Icons.camera_alt_rounded, size: 17),
-                  label: const Text(
-                    'Camera Dịch Chữ',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => SmartTranslatorScreen.open(
-                    context,
-                    initialTabIndex: 0,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF18181B),
-                    side: const BorderSide(color: Color(0xFF18181B), width: 1.3),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: const Icon(Icons.record_voice_over_rounded, size: 17),
-                  label: const Text(
-                    'Dịch Hội Thoại',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => SmartTranslatorScreen.open(
-                    context,
-                    initialTabIndex: 1,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= TAB 3: HỒ SƠ PHỤ HUYNH & CÀI ĐẶT GIA ĐÌNH =================
-  Widget _buildParentProfileTab() {
+  // ================= TAB 4: HỒ SƠ GIA ĐÌNH & CÀI ĐẶT AN TOÀN =================
+  Widget _buildFamilySettingsTab() {
     final user = widget.authController.currentUser;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 28,
-                backgroundColor: const Color(0xFFF4F4F5),
+                radius: 30,
+                backgroundColor: AppColors.primarySoft,
                 child: Text(
-                  (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF09090B)),
+                  (user?.fullName ?? 'K').substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primaryDark,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -1072,27 +1030,27 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.fullName ?? 'Phụ Huynh Minh Anh',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      user?.fullName ?? 'Hồng Hoàng Khang (User)',
+                      style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      user?.email ?? 'phuhuynh@childdevices.vn',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                      user?.email ?? 'honghoangkhang@gmail.com',
+                      style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF4F4F5),
-                        borderRadius: BorderRadius.circular(4),
+                        color: AppColors.primarySoft,
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
-                        'VAI TRÒ: PHỤ HUYNH / KHÁCH HÀNG (USER)',
+                        'CHỦ HỘ GIA ĐÌNH • ROLE: USER',
                         style: TextStyle(
-                          color: Color(0xFF09090B),
                           fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primaryDark,
                         ),
                       ),
                     ),
@@ -1104,70 +1062,60 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Cài đặt cảnh báo SOS
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Cài đặt an toàn & Cảnh báo khẩn cấp',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                'Cấu hình Vùng An Toàn & SOS Khẩn Cấp',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5),
               ),
-              const SizedBox(height: 12),
-              _buildParentSettingTile(Icons.notifications_active_outlined, 'Âm thanh cảnh báo SOS mức cao nhất'),
-              _buildParentSettingTile(Icons.shield_outlined, 'Thông báo ngay khi con ra khỏi vùng an toàn'),
-              InkWell(
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                activeThumbColor: AppColors.primary,
+                value: _safeZoneAlert,
+                title: const Text('Báo động tức thì khi bé rời khỏi Trường / Nhà', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                onChanged: (v) => setState(() => _safeZoneAlert = v),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.support_agent_rounded, color: AppColors.primary),
+                title: const Text('Gọi Tổng đài Kỹ thuật viên (STAFF)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                subtitle: const Text('Kết nối LiveKit Video Call trực tiếp với nhân viên trực ca', style: TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
                   CallHubWidget.launchDirectCall(
                     context: context,
                     authController: widget.authController,
                     roomName: 'phong-ho-tro-ky-thuat',
-                    description: 'Kết nối trực tuyến Phụ huynh (USER) và Kỹ thuật viên (STAFF)',
+                    description: 'Phụ huynh kết nối trực tiếp Kỹ thuật viên (STAFF)',
                     callType: CallType.support,
                   );
                 },
-                child: _buildParentSettingTile(
-                  Icons.headset_mic_outlined,
-                  'Gọi trực tiếp Kỹ thuật viên trực tuyến (STAFF)',
-                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
 
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFEF4444),
+            backgroundColor: AppColors.error,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           icon: const Icon(Icons.logout_rounded),
-          label: const Text('Đăng xuất tài khoản', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          onPressed: _handleLogout,
+          label: const Text('Đăng xuất khỏi thiết bị', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          onPressed: _confirmAndLogout,
         ),
       ],
-    );
-  }
-
-  Widget _buildParentSettingTile(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: const Color(0xFF09090B)),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
-          const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
-        ],
-      ),
     );
   }
 }
