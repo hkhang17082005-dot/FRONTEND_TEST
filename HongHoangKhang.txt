@@ -1,6 +1,7 @@
 Họ và tên: Hồng Hoàng Khang
 Đề tài: Đề 1 - App quản lý thiết bị trẻ em (Child Devices)
-Tên project Flutter: honghoangkhang_testfront
+Tên project Flutter: honghoangkhang_test_frontend
+Tên project Backend: honghoangkhang_test_backend
 Link API đã deploy: https://mobile.zeion.online/api
 
 ----------------------------------------------------------------------
