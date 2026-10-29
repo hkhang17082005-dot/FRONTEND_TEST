@@ -1,0 +1,49 @@
+HỌ VÀ TÊN: HỒNG HOÀNG KHANG
+ĐỀ TÀI: Đề 1 - Ứng dụng Quản lý Thiết bị Trẻ em (Child Devices Management)
+TÊN PROJECT FLUTTER: honghoangkhang_testfront (Package: com.hong_hoang_khang.testfront)
+LINK DEPLOY BACKEND API: https://mobile.zeion.online (API Endpoint: https://mobile.zeion.online/api)
+
+========================================================================
+DANH SÁCH CÁC CHỨC NĂNG ĐÃ HOÀN THÀNH & ĐIỂM DỰ KIẾN
+========================================================================
+
+1. Đăng ký tài khoản & Xác thực OAuth2.0: (Đã hoàn thành 100%)
+   - Đăng ký tài khoản mới qua Email kết hợp xác thực mã OTP 6 chữ số gửi về Email (Resend API).
+   - Đăng ký / Đăng nhập nhanh bằng tài khoản bên thứ 3: Google Sign-In (OAuth 2.0 xác thực Google ID Token tại Backend).
+
+2. Đăng nhập bảo mật 2 lớp (2FA): (Đã hoàn thành 100%)
+   - Bước 1: Kiểm tra thông tin Email + Mật khẩu.
+   - Bước 2: Bắt buộc xác thực mã Email OTP 6 chữ số có đếm ngược thời gian hiệu lực trước khi cấp JWT Token.
+
+3. Phân quyền người dùng (3 Role tách biệt hoàn toàn giao diện): (Đã hoàn thành 100%)
+   - ADMIN (anhjkrrr@gmail.com / honghoangkhang.admin@gmail.com): Vào Trang Quản Trị Cấp Cao (Admin Portal) - thống kê toàn hệ thống, quản lý kho thiết bị, quản lý phân quyền người dùng (ADMIN/STAFF/USER), nhật ký kiểm toán (Audit Logs) và cấu hình bảo trì.
+   - STAFF (anhjkrr@gmail.com / honghoangkhang.staff@gmail.com): Vào Dashboard Nhân Viên Vận Hành & Kỹ Thuật (Staff Operations) - quản lý bàn ca trực, checklist nhiệm vụ, Trạm kiểm định phần cứng & an toàn bức xạ (QC), xử lý phiếu hỗ trợ phụ huynh và gọi Video Call hỗ trợ kỹ thuật.
+   - USER / Khách hàng - Phụ huynh (anhjkr@gmail.com / honghoangkhang@gmail.com): Vào Trang Phụ Huynh & Gia Đình - khám phá thiết bị theo lứa tuổi, giám sát thiết bị của bé, gọi điện/Video Call LiveKit và sử dụng Trợ lý Dịch thuật AI.
+
+4. Các chức năng CRUD (4.5 / 4.5 điểm): (Đã hoàn thành 100%)
+   - Read: Hiển thị danh sách thiết bị trẻ em từ Server API (https://mobile.zeion.online/api/Devices), xem chi tiết thông số an toàn, tìm kiếm theo từ khóa, lọc theo danh mục và độ tuổi của bé (Mầm non, Tiểu học, Thiếu niên).
+   - Create: Thêm mới thiết bị trẻ em với đầy đủ thông tin (tên, hãng, mã model, giá, tồn kho, độ tuổi phù hợp, mô tả, hình ảnh).
+   - Update: Chỉnh sửa, cập nhật thông tin thiết bị và trạng thái kinh doanh trực tiếp lên Server.
+   - Delete: Xóa thiết bị khỏi hệ thống (có hộp thoại xác nhận an toàn, phân quyền Admin).
+   - Quản lý & phân quyền tài khoản người dùng (Cập nhật Role Admin/Staff/User).
+
+5. Các chức năng thuyết trình đã tích hợp (3.5 / 3.5 điểm):
+   - Chức năng (c) - Gọi Video nhóm & Đàm thoại 1-1 thời gian thực (LiveKit WebRTC):
+     + Tạo phòng gọi mới, tham gia phòng trực tuyến (Hỗ trợ kỹ thuật, Trạm trực SOS 24/7, Gọi nhóm gia đình).
+     + Bật/tắt Camera, Micro, Loa ngoài, Đổi Camera trước/sau và hiển thị danh sách người tham gia realtime.
+   - Chức năng (f) - Dịch Realtime & Dịch qua Camera chụp ảnh (AI Translator Anh -> Việt):
+     + Quét chữ trực tiếp từ Camera (Realtime Camera OCR với Google ML Kit Text Recognition) và dịch tự động Tiếng Anh sang Tiếng Việt kèm khung nhận diện.
+     + Dịch hội thoại giọng nói thời gian thực (Speech-to-Text & Text-to-Speech phát âm chuẩn).
+   - Chức năng (b) - Chia sẻ vị trí & Giám sát vùng an toàn GPS của thiết bị trẻ em:
+     + Theo dõi vị trí thiết bị của bé (Đồng hồ định vị GPS, vùng an toàn trường học/nhà riêng, phần trăm pin, trạng thái an toàn) và API chia sẻ vị trí trực tiếp (/api/Location).
+
+6. Tính năng mới tự đề xuất mà các ứng dụng hiện tại chưa có (1.0 / 1.0 điểm):
+   - Trạm Kiểm Định An Toàn Phần Cứng & Bức Xạ Trẻ Em (QC Station) dành cho Staff kết hợp Tổng đài Cứu hộ Kỹ thuật Video Call trực tiếp từ từng Phiếu hỗ trợ (Support Ticket) và từng Thiết bị của bé, kèm Trợ lý AI dịch thuật tài liệu hướng dẫn thiết bị quốc tế cho phụ huynh.
+
+7. Giao diện đẹp, dễ dùng, kết nối API Deploy ổn định (1.0 / 1.0 điểm):
+   - Giao diện Monochrome Security Edition đồng bộ, hiện đại, tách biệt rõ ràng 3 Role.
+   - Sử dụng 100% API đã deploy tại https://mobile.zeion.online/api (không dùng localhost).
+
+========================================================================
+TỔNG ĐIỂM DỰ KIẾN: 10.0 / 10.0 ĐIỂM
+========================================================================

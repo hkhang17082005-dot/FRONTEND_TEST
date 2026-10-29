@@ -40,7 +40,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     _managedUsers = [
       {
         'id': 1,
-        'name': 'Nguyễn Quang Hưng (Admin)',
+        'name': 'Hồng Hoàng Khang (Admin)',
         'email': 'anhjkrrr@gmail.com',
         'role': 'ADMIN',
         'isActive': true,
@@ -48,7 +48,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       {
         'id': 2,
-        'name': 'Nguyễn Quang Hưng (Staff)',
+        'name': 'Hồng Hoàng Khang (Staff)',
         'email': 'anhjkrr@gmail.com',
         'role': 'STAFF',
         'isActive': true,
@@ -56,7 +56,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       {
         'id': 3,
-        'name': 'Nguyễn Quang Hưng (User)',
+        'name': 'Hồng Hoàng Khang (User)',
         'email': 'anhjkr@gmail.com',
         'role': 'USER',
         'isActive': true,
@@ -156,7 +156,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void _showDeviceDetailDialog(Device d) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFF141417),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -186,12 +186,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFF09090B),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF27272A)),
                     ),
                     child: d.imageUrl == null || d.imageUrl!.isEmpty
-                        ? const Icon(Icons.devices_rounded, color: Color(0xFF818CF8), size: 32)
+                        ? const Icon(Icons.devices_rounded, color: Color(0xFFFFFFFF), size: 32)
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
@@ -199,7 +199,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               fit: BoxFit.cover,
                               errorBuilder: (_, _, _) => const Icon(
                                 Icons.devices_rounded,
-                                color: Color(0xFF818CF8),
+                                color: Color(0xFFFFFFFF),
                                 size: 32,
                               ),
                             ),
@@ -221,13 +221,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'ID: #${d.id} • Danh mục: ${d.category}',
-                          style: const TextStyle(color: Color(0xFF818CF8), fontSize: 12.5, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12.5, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${d.price.toStringAsFixed(0)} VNĐ',
                           style: const TextStyle(
-                            color: Color(0xFF34D399),
+                            color: Color(0xFFF4F4F5),
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
                           ),
@@ -237,7 +237,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ],
               ),
-              const Divider(color: Color(0xFF334155), height: 24),
+              const Divider(color: Color(0xFF27272A), height: 24),
               if (d.description != null && d.description!.isNotEmpty) ...[
                 const Text(
                   'Mô tả sản phẩm:',
@@ -281,7 +281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4F46E5),
+                        backgroundColor: const Color(0xFF27272A),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -327,7 +327,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: const [
-              Icon(Icons.manage_accounts_rounded, color: Color(0xFF4F46E5)),
+              Icon(Icons.manage_accounts_rounded, color: Color(0xFF27272A)),
               SizedBox(width: 10),
               Text('Phân quyền tài khoản'),
             ],
@@ -355,12 +355,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Navigator.pop(ctx);
                 _notifyRoleChanged(userItem['name'], 'ADMIN');
               }),
-              _buildRoleOptionTile('STAFF', 'Nhân viên vận hành & Kỹ thuật', const Color(0xFF059669), () {
+              _buildRoleOptionTile('STAFF', 'Nhân viên vận hành & Kỹ thuật', const Color(0xFF3F3F46), () {
                 setState(() => userItem['role'] = 'STAFF');
                 Navigator.pop(ctx);
                 _notifyRoleChanged(userItem['name'], 'STAFF');
               }),
-              _buildRoleOptionTile('USER', 'Khách hàng / Phụ huynh', const Color(0xFF2563EB), () {
+              _buildRoleOptionTile('USER', 'Khách hàng / Phụ huynh', const Color(0xFF52525B), () {
                 setState(() => userItem['role'] = 'USER');
                 Navigator.pop(ctx);
                 _notifyRoleChanged(userItem['name'], 'USER');
@@ -406,7 +406,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void _notifyRoleChanged(String name, String newRole) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF4F46E5),
+        backgroundColor: const Color(0xFF27272A),
         behavior: SnackBarBehavior.floating,
         content: Text('Đã cập nhật vai trò của "$name" thành $newRole'),
       ),
@@ -461,7 +461,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4F46E5),
+                backgroundColor: const Color(0xFF27272A),
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -492,7 +492,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF09090B),
       appBar: _buildAdminAppBar(),
       body: IndexedStack(
         index: _currentIndex,
@@ -509,7 +509,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   PreferredSizeWidget _buildAdminAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFF141417),
       elevation: 0,
       title: Row(
         children: [
@@ -586,14 +586,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildBottomNav() {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF1E293B),
-        border: Border(top: BorderSide(color: Color(0xFF334155), width: 1)),
+        color: Color(0xFF141417),
+        border: Border(top: BorderSide(color: Color(0xFF27272A), width: 1)),
       ),
       child: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        backgroundColor: const Color(0xFF1E293B),
-        selectedItemColor: const Color(0xFF818CF8),
+        backgroundColor: const Color(0xFF141417),
+        selectedItemColor: const Color(0xFFFFFFFF),
         unselectedItemColor: const Color(0xFF64748B),
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
@@ -636,10 +636,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                    colors: [Color(0xFF141417), Color(0xFF09090B)],
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF27272A)),
                 ),
                 child: Row(
                   children: [
@@ -647,11 +647,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       width: 10,
                       height: 10,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
+                        color: Color(0xFFE4E4E7),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFF10B981),
+                            color: Color(0xFFE4E4E7),
                             blurRadius: 8,
                             spreadRadius: 2,
                           ),
@@ -681,13 +681,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withAlpha(30),
+                        color: const Color(0xFFE4E4E7).withAlpha(30),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
                         '99.98% SLA',
                         style: TextStyle(
-                          color: Color(0xFF34D399),
+                          color: Color(0xFFF4F4F5),
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
                         ),
@@ -706,7 +706,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       value: '$totalDevices',
                       change: '+14% tháng này',
                       icon: Icons.devices_other_rounded,
-                      color: const Color(0xFF6366F1),
+                      color: const Color(0xFFE4E4E7),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -716,7 +716,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       value: '${_managedUsers.length * 280}',
                       change: '3 vai trò hoạt động',
                       icon: Icons.people_alt_rounded,
-                      color: const Color(0xFF3B82F6),
+                      color: const Color(0xFFD4D4D8),
                     ),
                   ),
                 ],
@@ -730,7 +730,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       value: '100%',
                       change: '3 Role tách biệt',
                       icon: Icons.verified_user_rounded,
-                      color: const Color(0xFF10B981),
+                      color: const Color(0xFFE4E4E7),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -763,7 +763,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: _buildActionBtn(
                       icon: Icons.add_circle_outline_rounded,
                       label: 'Thêm thiết bị',
-                      color: const Color(0xFF4F46E5),
+                      color: const Color(0xFF27272A),
                       onTap: () async {
                         final created = await Navigator.push<bool>(
                           context,
@@ -780,7 +780,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: _buildActionBtn(
                       icon: Icons.person_add_alt_1_rounded,
                       label: 'Tạo tài khoản',
-                      color: const Color(0xFF059669),
+                      color: const Color(0xFF3F3F46),
                       onTap: _showAddUserDialog,
                     ),
                   ),
@@ -805,9 +805,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF141417),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF27272A)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -826,14 +826,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.security_rounded, color: Color(0xFF818CF8), size: 18),
+                        Icon(Icons.security_rounded, color: Color(0xFFFFFFFF), size: 18),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildAuditItem('ADMIN khởi động phiên làm việc bảo mật', 'Vừa xong', const Color(0xFF10B981)),
-                    _buildAuditItem('Kiểm tra tải hệ thống & API Health', '10 phút trước', const Color(0xFF3B82F6)),
+                    _buildAuditItem('ADMIN khởi động phiên làm việc bảo mật', 'Vừa xong', const Color(0xFFE4E4E7)),
+                    _buildAuditItem('Kiểm tra tải hệ thống & API Health', '10 phút trước', const Color(0xFFD4D4D8)),
                     _buildAuditItem('Cấu hình 3 phân quyền: ADMIN, STAFF, USER', '35 phút trước', const Color(0xFFF59E0B)),
-                    _buildAuditItem('Đồng bộ cơ sở dữ liệu thiết bị trẻ em', '1 giờ trước', const Color(0xFF818CF8)),
+                    _buildAuditItem('Đồng bộ cơ sở dữ liệu thiết bị trẻ em', '1 giờ trước', const Color(0xFFFFFFFF)),
                   ],
                 ),
               ),
@@ -854,9 +854,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF141417),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFF27272A)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -984,7 +984,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         return Column(
           children: [
             Container(
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF141417),
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
                 children: [
@@ -997,7 +997,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           decoration: InputDecoration(
                             hintText: 'Tìm kiếm thiết bị...',
                             hintStyle: const TextStyle(color: Color(0xFF64748B)),
-                            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF818CF8), size: 20),
+                            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFFFFFFF), size: 20),
                             suffixIcon: _deviceSearchController.text.isNotEmpty
                                 ? IconButton(
                                     icon: const Icon(Icons.clear, color: Colors.white70, size: 16),
@@ -1008,11 +1008,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   )
                                 : null,
                             filled: true,
-                            fillColor: const Color(0xFF0F172A),
+                            fillColor: const Color(0xFF09090B),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: Color(0xFF334155)),
+                              borderSide: const BorderSide(color: Color(0xFF27272A)),
                             ),
                           ),
                           onChanged: (_) => setState(() {}),
@@ -1021,7 +1021,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4F46E5),
+                          backgroundColor: const Color(0xFF27272A),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1061,12 +1061,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               ),
                             ),
                             selected: isSel,
-                            selectedColor: const Color(0xFF4F46E5),
-                            backgroundColor: const Color(0xFF0F172A),
+                            selectedColor: const Color(0xFF27272A),
+                            backgroundColor: const Color(0xFF09090B),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                               side: BorderSide(
-                                color: isSel ? const Color(0xFF6366F1) : const Color(0xFF334155),
+                                color: isSel ? const Color(0xFFE4E4E7) : const Color(0xFF27272A),
                               ),
                             ),
                             onSelected: (_) => setState(() => _selectedCategory = cat),
@@ -1109,7 +1109,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             Expanded(
               child: _deviceController.isLoading && _deviceController.devices.isEmpty
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF818CF8)))
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFFFFFFF)))
                   : devices.isEmpty
                       ? Center(
                           child: Column(
@@ -1124,7 +1124,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const SizedBox(height: 8),
                               TextButton(
                                 onPressed: () => _deviceController.loadDevices(),
-                                child: const Text('Làm mới danh sách', style: TextStyle(color: Color(0xFF818CF8))),
+                                child: const Text('Làm mới danh sách', style: TextStyle(color: Color(0xFFFFFFFF))),
                               ),
                             ],
                           ),
@@ -1151,9 +1151,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF141417),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFF27272A)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -1170,12 +1170,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFF09090B),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFF27272A)),
                     ),
                     child: d.imageUrl == null || d.imageUrl!.isEmpty
-                        ? const Icon(Icons.devices_rounded, color: Color(0xFF818CF8), size: 24)
+                        ? const Icon(Icons.devices_rounded, color: Color(0xFFFFFFFF), size: 24)
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Image.network(
@@ -1183,7 +1183,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               fit: BoxFit.cover,
                               errorBuilder: (_, _, _) => const Icon(
                                 Icons.devices_rounded,
-                                color: Color(0xFF818CF8),
+                                color: Color(0xFFFFFFFF),
                                 size: 24,
                               ),
                             ),
@@ -1213,12 +1213,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4F46E5).withAlpha(40),
+                                color: const Color(0xFF27272A).withAlpha(40),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 d.category,
-                                style: const TextStyle(color: Color(0xFF818CF8), fontSize: 11, fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -1236,7 +1236,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     children: [
                       IconButton(
                         tooltip: 'Chỉnh sửa thiết bị',
-                        icon: const Icon(Icons.edit_rounded, color: Color(0xFF818CF8), size: 21),
+                        icon: const Icon(Icons.edit_rounded, color: Color(0xFFFFFFFF), size: 21),
                         onPressed: () => _editDevice(d),
                       ),
                       IconButton(
@@ -1257,14 +1257,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
                 ),
               ],
-              const Divider(color: Color(0xFF334155), height: 18),
+              const Divider(color: Color(0xFF27272A), height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '${d.price.toStringAsFixed(0)} đ',
                     style: const TextStyle(
-                      color: Color(0xFF34D399),
+                      color: Color(0xFFF4F4F5),
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
                     ),
@@ -1292,14 +1292,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: d.inStock
-                              ? const Color(0xFF10B981).withAlpha(30)
+                              ? const Color(0xFFE4E4E7).withAlpha(30)
                               : const Color(0xFFEF4444).withAlpha(30),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           d.inStock ? 'Còn tồn kho (${d.stockQuantity})' : 'Hết hàng',
                           style: TextStyle(
-                            color: d.inStock ? const Color(0xFF34D399) : const Color(0xFFF87171),
+                            color: d.inStock ? const Color(0xFFF4F4F5) : const Color(0xFFF87171),
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1333,7 +1333,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF141417),
           padding: const EdgeInsets.all(14),
           child: Column(
             children: [
@@ -1343,13 +1343,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 decoration: InputDecoration(
                   hintText: 'Tìm tài khoản theo tên hoặc email...',
                   hintStyle: const TextStyle(color: Color(0xFF64748B)),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF818CF8), size: 20),
+                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFFFFFFF), size: 20),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF09090B),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF334155)),
+                    borderSide: const BorderSide(color: Color(0xFF27272A)),
                   ),
                 ),
                 onChanged: (_) => setState(() {}),
@@ -1372,9 +1372,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     selectedColor: r == 'ADMIN'
                         ? const Color(0xFFDC2626)
                         : (r == 'STAFF'
-                            ? const Color(0xFF059669)
-                            : (r == 'USER' ? const Color(0xFF2563EB) : const Color(0xFF4F46E5))),
-                    backgroundColor: const Color(0xFF0F172A),
+                            ? const Color(0xFF3F3F46)
+                            : (r == 'USER' ? const Color(0xFF52525B) : const Color(0xFF27272A))),
+                    backgroundColor: const Color(0xFF09090B),
                     onSelected: (_) => setState(() => _userRoleFilter = r),
                   );
                 }).toList(),
@@ -1391,15 +1391,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               final role = user['role'] as String;
               final color = role == 'ADMIN'
                   ? const Color(0xFFEF4444)
-                  : (role == 'STAFF' ? const Color(0xFF10B981) : const Color(0xFF3B82F6));
+                  : (role == 'STAFF' ? const Color(0xFFE4E4E7) : const Color(0xFFD4D4D8));
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF141417),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFF27272A)),
                 ),
                 child: Row(
                   children: [
@@ -1448,7 +1448,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               Text(
                                 user['isActive'] ? '• Đang hoạt động' : '• Đã khóa',
                                 style: TextStyle(
-                                  color: user['isActive'] ? const Color(0xFF34D399) : const Color(0xFFF87171),
+                                  color: user['isActive'] ? const Color(0xFFF4F4F5) : const Color(0xFFF87171),
                                   fontSize: 11,
                                 ),
                               ),
@@ -1459,7 +1459,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     IconButton(
                       tooltip: 'Đổi vai trò',
-                      icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF818CF8)),
+                      icon: const Icon(Icons.edit_note_rounded, color: Color(0xFFFFFFFF)),
                       onPressed: () => _showChangeRoleDialog(user),
                     ),
                   ],
@@ -1483,12 +1483,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF312E81), Color(0xFF1E1B4B)],
+              colors: [Color(0xFF18181B), Color(0xFF09090B)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFF4338CA)),
+            border: Border.all(color: const Color(0xFF3F3F46)),
           ),
           child: Row(
             children: [
@@ -1551,7 +1551,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         _buildSettingTile(
           icon: Icons.alt_route_rounded,
           title: 'Đường dẫn API Gateway',
-          subtitle: 'http://localhost:5057 / http://10.0.2.2:5057',
+          subtitle: 'https://mobile.zeion.online/api (Cloud Production)',
         ),
         _buildSettingTile(
           icon: Icons.phone_disabled_rounded,
@@ -1561,7 +1561,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         SwitchListTile(
           value: _maintenanceMode,
           activeThumbColor: const Color(0xFFEF4444),
-          tileColor: const Color(0xFF1E293B),
+          tileColor: const Color(0xFF141417),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: const Text('Chế độ Bảo trì (Maintenance Mode)', style: TextStyle(color: Colors.white, fontSize: 14)),
           subtitle: const Text('Chỉ Admin mới có thể truy cập hệ thống', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
@@ -1599,14 +1599,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF141417),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFF27272A)),
       ),
       child: Material(
         color: Colors.transparent,
         child: ListTile(
-          leading: Icon(icon, color: const Color(0xFF818CF8)),
+          leading: Icon(icon, color: const Color(0xFFFFFFFF)),
           title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600)),
           subtitle: Text(subtitle, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11.5)),
         ),

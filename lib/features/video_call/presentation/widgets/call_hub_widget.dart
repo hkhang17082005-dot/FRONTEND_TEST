@@ -126,7 +126,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
   String? _errorMessage;
 
   bool get _isStaff => widget.authController.currentRoleType == UserRoleType.staff;
-  Color get _themeColor => _isStaff ? const Color(0xFF059669) : const Color(0xFF2563EB);
+  Color get _themeColor => _isStaff ? const Color(0xFF18181B) : const Color(0xFF09090B);
 
   @override
   void initState() {
@@ -253,8 +253,8 @@ class _CallHubWidgetState extends State<CallHubWidget> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: _isStaff
-              ? [const Color(0xFF064E3B), const Color(0xFF059669)]
-              : [const Color(0xFF1E3A8A), const Color(0xFF2563EB)],
+              ? [const Color(0xFF000000), const Color(0xFF18181B)]
+              : [const Color(0xFF000000), const Color(0xFF09090B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -341,7 +341,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
               title: 'Phòng Hỗ Trợ Kỹ Thuật Chung',
               subtitle: 'Trực tiếp nhận cuộc gọi tư vấn từ Phụ huynh (User)',
               icon: Icons.support_agent_rounded,
-              color: const Color(0xFF059669),
+              color: const Color(0xFF18181B),
               type: CallType.support,
             ),
             (
@@ -359,7 +359,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
               title: 'Gọi Nhân Viên Kỹ Thuật (STAFF)',
               subtitle: 'Kết nối trực tiếp với Staff đang trực ca hỗ trợ',
               icon: Icons.support_agent_rounded,
-              color: const Color(0xFF2563EB),
+              color: const Color(0xFF09090B),
               type: CallType.support,
             ),
             (
@@ -375,7 +375,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
               title: 'Gọi Đồng Hồ Bé Minh An (K2 Pro)',
               subtitle: 'Đàm thoại 2 chiều với thiết bị đeo của bé',
               icon: Icons.watch_rounded,
-              color: const Color(0xFF059669),
+              color: const Color(0xFF18181B),
               type: CallType.oneToOne,
             ),
           ];
@@ -772,7 +772,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: hasOnline ? const Color(0xFF059669) : Colors.grey.shade700,
+                    color: hasOnline ? const Color(0xFF18181B) : Colors.grey.shade700,
                   ),
                 ),
               ),
@@ -802,7 +802,7 @@ class _CallHubWidgetState extends State<CallHubWidget> {
                 decoration: BoxDecoration(
                   color: creatorRoleUpper == 'STAFF'
                       ? const Color(0xFFD1FAE5)
-                      : const Color(0xFFEFF6FF),
+                      : const Color(0xFFF4F4F5),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

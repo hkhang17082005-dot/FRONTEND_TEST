@@ -285,7 +285,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF1F5F9),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -323,7 +323,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
+                    border: Border.all(color: const Color(0xFF09090B), width: 1.5), boxShadow: [
                       BoxShadow(
                         color: Colors.black.withAlpha(14),
                         blurRadius: 20,
@@ -484,13 +484,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: const Color(0xFFF4F4F5),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFBFDBFE)),
+              border: Border.all(color: const Color(0xFF18181B), width: 1.2),
             ),
             child: Row(
               children: const [
-                Icon(Icons.verified_user_rounded, size: 18, color: Color(0xFF2563EB)),
+                Icon(Icons.verified_user_rounded, size: 18, color: Color(0xFF09090B)),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -498,7 +498,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E40AF),
+                      color: Color(0xFF09090B),
                     ),
                   ),
                 ),

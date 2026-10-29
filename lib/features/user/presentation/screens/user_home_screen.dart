@@ -99,11 +99,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
+                      color: const Color(0xFFF4F4F5),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFBFDBFE)),
+                      border: Border.all(color: const Color(0xFFD4D4D8)),
                     ),
-                    child: const Icon(Icons.devices_rounded, color: Color(0xFF2563EB), size: 36),
+                    child: const Icon(Icons.devices_rounded, color: Color(0xFF09090B), size: 36),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -183,14 +183,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF09090B),
                         ),
                       ),
                     ],
                   ),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: const Color(0xFF09090B),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -201,7 +201,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: const Color(0xFF09090B),
                           content: Text('Đã gửi yêu cầu tư vấn sản phẩm "${device.name}"'),
                         ),
                       );
@@ -220,16 +220,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: const Color(0xFFF4F4F5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFDBEAFE)),
+        border: Border.all(color: const Color(0xFFD4D4D8)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF2563EB)),
+          Icon(icon, size: 14, color: const Color(0xFF09090B)),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontSize: 11.5, color: Color(0xFF1E40AF), fontWeight: FontWeight.w600)),
+          Text(text, style: const TextStyle(fontSize: 11.5, color: Color(0xFF09090B), fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -238,7 +238,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: _buildUserAppBar(),
       body: IndexedStack(
         index: _currentIndex,
@@ -270,10 +270,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: const Color(0xFFF4F4F5),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.family_restroom_rounded, color: Color(0xFF2563EB), size: 22),
+            child: const Icon(Icons.family_restroom_rounded, color: Color(0xFF09090B), size: 22),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -306,20 +306,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           margin: const EdgeInsets.symmetric(vertical: 12),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: const Color(0xFFF4F4F5),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFBFDBFE)),
+            border: Border.all(color: const Color(0xFFD4D4D8)),
           ),
           child: const Row(
             children: [
-              Icon(Icons.verified_rounded, size: 14, color: Color(0xFF2563EB)),
+              Icon(Icons.verified_rounded, size: 14, color: Color(0xFF09090B)),
               SizedBox(width: 4),
               Text(
                 'ROLE: USER',
                 style: TextStyle(
                   fontSize: 10.5,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF09090B),
                 ),
               ),
             ],
@@ -344,7 +344,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF2563EB),
+        selectedItemColor: const Color(0xFF09090B),
         unselectedItemColor: const Color(0xFF64748B),
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5),
@@ -406,14 +406,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF38BDF8)],
+                    colors: [Color(0xFF09090B), Color(0xFF27272A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withAlpha(40),
+                      color: const Color(0xFF09090B).withAlpha(40),
                       blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
@@ -465,7 +465,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 decoration: InputDecoration(
                   hintText: 'Tìm thiết bị cho bé (đồng hồ, camera, máy tính...)',
                   hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF2563EB)),
+                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF09090B)),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear, size: 18),
@@ -522,7 +522,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           ),
                         ),
                         selected: isSel,
-                        selectedColor: const Color(0xFF2563EB),
+                        selectedColor: const Color(0xFF09090B),
                         backgroundColor: Colors.white,
                         onSelected: (_) => setState(() => _selectedCategory = cat),
                       ),
@@ -537,7 +537,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+                    child: CircularProgressIndicator(color: Color(0xFF09090B)),
                   ),
                 )
               else if (devices.isEmpty)
@@ -583,7 +583,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         label: Text(
           label,
           style: TextStyle(
-            color: isSel ? const Color(0xFF2563EB) : AppColors.textSecondary,
+            color: isSel ? const Color(0xFF09090B) : AppColors.textSecondary,
             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
             fontSize: 11.5,
           ),
@@ -591,10 +591,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         selected: isSel,
         onSelected: (_) => setState(() => _selectedAgeFilter = index),
         backgroundColor: Colors.white,
-        selectedColor: const Color(0xFFEFF6FF),
+        selectedColor: const Color(0xFFF4F4F5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: isSel ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0)),
+          side: BorderSide(color: isSel ? const Color(0xFF09090B) : const Color(0xFFE2E8F0)),
         ),
       ),
     );
@@ -627,10 +627,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               width: 58,
               height: 58,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: const Color(0xFFF4F4F5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.devices_rounded, color: Color(0xFF2563EB), size: 28),
+              child: const Icon(Icons.devices_rounded, color: Color(0xFF09090B), size: 28),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -659,19 +659,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF09090B),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFECFDF5),
+                          color: const Color(0xFFF4F4F5),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
                           'An toàn cho bé',
                           style: TextStyle(
-                            color: Color(0xFF059669),
+                            color: Color(0xFF18181B),
                             fontSize: 10.5,
                             fontWeight: FontWeight.bold,
                           ),
@@ -717,7 +717,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           location: 'Trường Tiểu học Chu Văn An (Vùng an toàn)',
           battery: '86%',
           isSafe: true,
-          avatarColor: const Color(0xFF3B82F6),
+          avatarColor: const Color(0xFF09090B),
         ),
         const SizedBox(height: 14),
 
@@ -729,7 +729,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           location: 'Phòng ngủ bé (Tầng 2 - Bình thường)',
           battery: 'Cắm nguồn 24/7',
           isSafe: true,
-          avatarColor: const Color(0xFFEC4899),
+          avatarColor: const Color(0xFF27272A),
         ),
         const SizedBox(height: 20),
 
@@ -737,13 +737,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+            side: const BorderSide(color: Color(0xFF09090B), width: 1.5),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF09090B)),
           label: const Text(
             'Quét mã QR kết nối thêm thiết bị cho bé',
-            style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold),
+            style: TextStyle(color: Color(0xFF09090B), fontWeight: FontWeight.bold),
           ),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -810,17 +810,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
+                  color: const Color(0xFFF4F4F5),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   children: const [
-                    Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 14),
+                    Icon(Icons.check_circle_rounded, color: Color(0xFF18181B), size: 14),
                     SizedBox(width: 4),
                     Text(
                       'AN TOÀN',
                       style: TextStyle(
-                        color: Color(0xFF047857),
+                        color: Color(0xFF09090B),
                         fontWeight: FontWeight.bold,
                         fontSize: 10.5,
                       ),
@@ -833,7 +833,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           const Divider(height: 20),
           Row(
             children: [
-              const Icon(Icons.watch_rounded, size: 16, color: Color(0xFF2563EB)),
+              const Icon(Icons.watch_rounded, size: 16, color: Color(0xFF09090B)),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -850,12 +850,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.place_rounded, size: 16, color: Color(0xFF10B981)),
+              const Icon(Icons.place_rounded, size: 16, color: Color(0xFF18181B)),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   location,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF065F46)),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF27272A)),
                 ),
               ),
             ],
@@ -866,8 +866,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF2563EB),
-                    side: const BorderSide(color: Color(0xFF2563EB)),
+                    foregroundColor: const Color(0xFF09090B),
+                    side: const BorderSide(color: Color(0xFF09090B)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   icon: const Icon(Icons.phone_in_talk_rounded, size: 17),
@@ -889,7 +889,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Expanded(
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF09090B),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -914,7 +914,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   backgroundColor: const Color(0xFFF1F5F9),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                icon: const Icon(Icons.support_agent_rounded, color: Color(0xFF059669)),
+                icon: const Icon(Icons.support_agent_rounded, color: Color(0xFF18181B)),
                 tooltip: 'Gọi Staff hỗ trợ thiết bị này',
                 onPressed: () {
                   CallHubWidget.launchDirectCall(
@@ -940,10 +940,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
+        border: Border.all(color: const Color(0xFFD4D4D8)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2563EB).withAlpha(14),
+            color: const Color(0xFF09090B).withAlpha(14),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -957,12 +957,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: const Color(0xFFF4F4F5),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.translate_rounded,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF09090B),
                   size: 20,
                 ),
               ),
@@ -995,7 +995,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Expanded(
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF09090B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -1017,8 +1017,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF059669),
-                    side: const BorderSide(color: Color(0xFF059669), width: 1.3),
+                    foregroundColor: const Color(0xFF18181B),
+                    side: const BorderSide(color: Color(0xFF18181B), width: 1.3),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1060,10 +1060,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: const Color(0xFFEFF6FF),
+                backgroundColor: const Color(0xFFF4F4F5),
                 child: Text(
                   (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF09090B)),
                 ),
               ),
               const SizedBox(width: 14),
@@ -1084,13 +1084,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: const Color(0xFFF4F4F5),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
                         'VAI TRÒ: PHỤ HUYNH / KHÁCH HÀNG (USER)',
                         style: TextStyle(
-                          color: Color(0xFF1D4ED8),
+                          color: Color(0xFF09090B),
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1162,7 +1162,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF2563EB)),
+          Icon(icon, size: 20, color: const Color(0xFF09090B)),
           const SizedBox(width: 12),
           Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
           const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),

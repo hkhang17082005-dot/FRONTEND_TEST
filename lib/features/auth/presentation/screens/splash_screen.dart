@@ -25,7 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initApp() async {
-    // Cho phép hiển thị splash tối thiểu 800ms để trải nghiệm mượt mà
     final results = await Future.wait([
       widget.authController.checkInitialSession(),
       Future.delayed(const Duration(milliseconds: 800)),
@@ -36,7 +35,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      // Điều hướng tới đúng khu vực màn hình của Role (ADMIN / STAFF / USER)
       RoleRouter.navigateToRoleHome(context, widget.authController);
     } else {
       Navigator.pushReplacement(
@@ -51,39 +49,59 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(25),
-                shape: BoxShape.circle,
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white24, width: 2),
               ),
               child: const Icon(
-                Icons.child_care_rounded,
-                size: 64,
+                Icons.shield_moon_rounded,
+                size: 46,
                 color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              AppConstants.appName,
-              style: TextStyle(
+            Text(
+              AppConstants.appName.toUpperCase(),
+              style: const TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3.0,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white24),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'MONOCHROME SECURITY EDITION',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: Colors.white70,
+                ),
+              ),
+            ),
+            const SizedBox(height: 36),
             const SizedBox(
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: AppColors.primary,
+                strokeWidth: 2.2,
+                color: Colors.white,
               ),
             ),
           ],

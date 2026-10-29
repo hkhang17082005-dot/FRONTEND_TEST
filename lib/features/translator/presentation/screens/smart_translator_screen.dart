@@ -136,12 +136,12 @@ class _SmartTranslatorScreenState extends State<SmartTranslatorScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+          color: isSelected ? const Color(0xFF09090B) : Colors.transparent,
           borderRadius: BorderRadius.circular(11),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withAlpha(45),
+                    color: const Color(0xFF09090B).withAlpha(45),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),

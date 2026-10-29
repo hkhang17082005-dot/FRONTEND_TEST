@@ -463,7 +463,7 @@ class _VoiceConversationTranslatorTabState
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _isListening || _isPlayingSampleDialogue
-                  ? [const Color(0xFF1E3A8A), const Color(0xFF2563EB)]
+                  ? [const Color(0xFF1E3A8A), const Color(0xFF09090B)]
                   : [const Color(0xFF0F172A), const Color(0xFF1E293B)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -471,7 +471,7 @@ class _VoiceConversationTranslatorTabState
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2563EB).withAlpha(35),
+                color: const Color(0xFF09090B).withAlpha(35),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -538,7 +538,7 @@ class _VoiceConversationTranslatorTabState
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: _autoSpeakVietnamese
-                            ? const Color(0xFF2563EB)
+                            ? const Color(0xFF09090B)
                             : Colors.white12,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -644,7 +644,7 @@ class _VoiceConversationTranslatorTabState
                   const Icon(
                     Icons.record_voice_over_rounded,
                     size: 16,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF09090B),
                   ),
                   const SizedBox(width: 6),
                   const Expanded(
@@ -661,7 +661,7 @@ class _VoiceConversationTranslatorTabState
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _isPlayingSampleDialogue
                           ? const Color(0xFFEF4444)
-                          : const Color(0xFF059669),
+                          : const Color(0xFF18181B),
                       foregroundColor: Colors.white,
                       visualDensity: VisualDensity.compact,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -703,7 +703,7 @@ class _VoiceConversationTranslatorTabState
                           ),
                         ),
                         selected: isSelected,
-                        selectedColor: const Color(0xFF2563EB),
+                        selectedColor: const Color(0xFF09090B),
                         backgroundColor: const Color(0xFFF1F5F9),
                         onSelected: (_) {
                           setState(() {
@@ -797,7 +797,7 @@ class _VoiceConversationTranslatorTabState
                       icon: const Icon(
                         Icons.send_rounded,
                         size: 18,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF09090B),
                       ),
                       onPressed: _translateAndSpeakManualInput,
                     ),
@@ -815,13 +815,13 @@ class _VoiceConversationTranslatorTabState
                   decoration: BoxDecoration(
                     color: _isListening
                         ? const Color(0xFFEF4444)
-                        : const Color(0xFF2563EB),
+                        : const Color(0xFF09090B),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: (_isListening
                                 ? const Color(0xFFEF4444)
-                                : const Color(0xFF2563EB))
+                                : const Color(0xFF09090B))
                             .withAlpha(70),
                         blurRadius: _isListening ? 12 + (_soundLevel.abs() * 0.5) : 8,
                         offset: const Offset(0, 3),
@@ -880,7 +880,7 @@ class _VoiceConversationTranslatorTabState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: const Color(0xFFF4F4F5),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -888,7 +888,7 @@ class _VoiceConversationTranslatorTabState
                   style: const TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF09090B),
                   ),
                 ),
               ),
@@ -899,14 +899,14 @@ class _VoiceConversationTranslatorTabState
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   child: Row(
                     children: [
-                      Icon(Icons.volume_up_rounded, size: 15, color: Color(0xFF2563EB)),
+                      Icon(Icons.volume_up_rounded, size: 15, color: Color(0xFF09090B)),
                       SizedBox(width: 3),
                       Text(
                         'Phát âm EN',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF09090B),
                         ),
                       ),
                     ],
@@ -920,14 +920,14 @@ class _VoiceConversationTranslatorTabState
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   child: Row(
                     children: [
-                      Icon(Icons.record_voice_over_rounded, size: 15, color: Color(0xFF059669)),
+                      Icon(Icons.record_voice_over_rounded, size: 15, color: Color(0xFF18181B)),
                       SizedBox(width: 3),
                       Text(
                         'Đọc VI',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF059669),
+                          color: Color(0xFF18181B),
                         ),
                       ),
                     ],

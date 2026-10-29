@@ -358,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF1F5F9),
+        backgroundColor: const Color(0xFFFAFAFA),
         body: Stack(
           children: [
             // Background Gradient Curve Header
@@ -367,9 +367,9 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF1E3A8A),
-                    Color(0xFF2563EB),
-                    Color(0xFF3B82F6),
+                    Color(0xFF000000),
+                    Color(0xFF18181B),
+                    Color(0xFF27272A),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -467,7 +467,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
+                        border: Border.all(color: const Color(0xFF09090B), width: 1.5), boxShadow: [
                           BoxShadow(
                             color: Colors.black.withAlpha(18),
                             blurRadius: 24,

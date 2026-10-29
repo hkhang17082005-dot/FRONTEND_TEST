@@ -208,14 +208,14 @@ class _GoogleAccountPickerSheetState extends State<_GoogleAccountPickerSheet> {
 
   static const List<_GooglePresetAccount> _presetAccounts = [
     _GooglePresetAccount(
-      email: 'nguyenquanghung@gmail.com',
-      fullName: 'Nguyễn Quang Hưng',
-      avatarColor: Color(0xFF2563EB),
+      email: 'honghoangkhang@gmail.com',
+      fullName: 'Hồng Hoàng Khang',
+      avatarColor: Color(0xFF09090B),
     ),
     _GooglePresetAccount(
       email: 'phuhuynh.childdevices@gmail.com',
       fullName: 'Phụ Huynh Minh Anh',
-      avatarColor: Color(0xFF059669),
+      avatarColor: Color(0xFF27272A),
     ),
   ];
 
@@ -437,7 +437,7 @@ class _GoogleAccountPickerSheetState extends State<_GoogleAccountPickerSheet> {
                         children: const [
                           CircleAvatar(
                             radius: 18,
-                            backgroundColor: Color(0xFFEFF6FF),
+                            backgroundColor: Color(0xFFF4F4F5),
                             child: Icon(
                               Icons.person_add_alt_1_rounded,
                               size: 18,

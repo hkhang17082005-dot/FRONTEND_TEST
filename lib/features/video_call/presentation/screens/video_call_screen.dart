@@ -129,7 +129,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 behavior: SnackBarBehavior.floating,
-                backgroundColor: const Color(0xFF059669),
+                backgroundColor: const Color(0xFF18181B),
                 content: Text('$pName đã tham gia cuộc gọi'),
                 duration: const Duration(seconds: 2),
               ),
@@ -303,8 +303,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
                   backgroundColor: localRole == 'STAFF'
-                      ? const Color(0xFF059669)
-                      : const Color(0xFF2563EB),
+                      ? const Color(0xFF18181B)
+                      : const Color(0xFF09090B),
                   child: const Icon(Icons.person, color: Colors.white),
                 ),
                 title: Text(
@@ -342,8 +342,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(
                     backgroundColor: rRole == 'STAFF'
-                        ? const Color(0xFF059669)
-                        : const Color(0xFF2563EB),
+                        ? const Color(0xFF18181B)
+                        : const Color(0xFF09090B),
                     child: const Icon(Icons.person_outline, color: Colors.white),
                   ),
                   title: Text(
@@ -603,7 +603,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: isStaff ? const Color(0xFF059669) : const Color(0xFF2563EB),
+              color: isStaff ? const Color(0xFF18181B) : const Color(0xFF09090B),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -638,8 +638,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                         decoration: BoxDecoration(
                           color: isStaff
-                              ? const Color(0xFF059669).withAlpha(80)
-                              : const Color(0xFF2563EB).withAlpha(80),
+                              ? const Color(0xFF18181B).withAlpha(80)
+                              : const Color(0xFF09090B).withAlpha(80),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -721,7 +721,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                     width: 96,
                     height: 96,
                     decoration: BoxDecoration(
-                      color: (isStaff ? const Color(0xFF059669) : const Color(0xFF2563EB))
+                      color: (isStaff ? const Color(0xFF18181B) : const Color(0xFF09090B))
                           .withAlpha(35),
                       shape: BoxShape.circle,
                       border: Border.all(

@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF1769FF);
-  static const Color primaryDark = Color(0xFF0F4CD9);
-  static const Color primaryLight = Color(0xFF3B82F6);
-  static const Color primarySoft = Color(0xFFEFF6FF);
-  static const Color accent = Color(0xFF06B6D4);
-  static const Color background = Color(0xFFF8FAFC);
+  // Bảng màu Trắng - Đen Tương Phản Hiện Đại (Modern High-Contrast Monochrome)
+  static const Color primary = Color(0xFF09090B); // Đen Obsidian nguyên bản
+  static const Color primaryDark = Color(0xFF000000); // Đen tuyệt đối
+  static const Color primaryLight = Color(0xFF27272A); // Xám than chì (Zinc 800)
+  static const Color primarySoft = Color(0xFFF4F4F5); // Xám trắng nhạt (Zinc 100)
+  static const Color accent = Color(0xFF18181B); // Đen ánh kim (Zinc 900)
+  static const Color background = Color(0xFFFAFAFA); // Trắng Gallery hiện đại
   static const Color surface = Colors.white;
-  static const Color inputFill = Color(0xFFF1F5F9);
-  static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textMuted = Color(0xFF94A3B8);
-  static const Color success = Color(0xFF10B981);
-  static const Color error = Color(0xFFEF4444);
-  static const Color border = Color(0xFFE2E8F0);
-  static const Color borderLight = Color(0xFFF1F5F9);
+  static const Color inputFill = Color(0xFFF4F4F5);
+  static const Color textPrimary = Color(0xFF09090B);
+  static const Color textSecondary = Color(0xFF52525B);
+  static const Color textMuted = Color(0xFFA1A1AA);
+  static const Color success = Color(0xFF18181B);
+  static const Color error = Color(0xFFDC2626);
+  static const Color border = Color(0xFFE4E4E7);
+  static const Color borderLight = Color(0xFFF4F4F5);
 
-  // Gradients
+  // Gradients Trắng - Đen hiện đại
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF2563EB), Color(0xFF1769FF), Color(0xFF0F4CD9)],
+    colors: [Color(0xFF000000), Color(0xFF18181B), Color(0xFF27272A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [Colors.white, Color(0xFFF8FAFC)],
+    colors: [Colors.white, Color(0xFFFAFAFA)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );

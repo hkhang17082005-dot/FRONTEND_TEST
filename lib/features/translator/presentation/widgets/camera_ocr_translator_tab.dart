@@ -703,7 +703,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isFrozen
                               ? const Color(0xFF10B981)
-                              : const Color(0xFF2563EB),
+                              : const Color(0xFF09090B),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           shape: RoundedRectangleBorder(
@@ -772,7 +772,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFEFF6FF),
+                                color: const Color(0xFFF4F4F5),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: const Text(
@@ -780,7 +780,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2563EB),
+                                  color: Color(0xFF09090B),
                                 ),
                               ),
                             ),
@@ -791,7 +791,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                               icon: const Icon(
                                 Icons.volume_up_rounded,
                                 size: 20,
-                                color: Color(0xFF2563EB),
+                                color: Color(0xFF09090B),
                               ),
                               onPressed: () =>
                                   _translatorService.speakEnglish(_recognizedEnglishText),
@@ -845,7 +845,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                                   Icon(
                                     Icons.translate_rounded,
                                     size: 12,
-                                    color: Color(0xFF059669),
+                                    color: Color(0xFF18181B),
                                   ),
                                   SizedBox(width: 4),
                                   Text(
@@ -853,7 +853,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                                     style: TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF059669),
+                                      color: Color(0xFF18181B),
                                     ),
                                   ),
                                 ],
@@ -866,7 +866,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                                 height: 15,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Color(0xFF059669),
+                                  color: Color(0xFF18181B),
                                 ),
                               ),
                             IconButton(
@@ -875,7 +875,7 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
                               icon: const Icon(
                                 Icons.record_voice_over_rounded,
                                 size: 20,
-                                color: Color(0xFF059669),
+                                color: Color(0xFF18181B),
                               ),
                               onPressed: () =>
                                   _translatorService.speakVietnamese(_translatedVietnameseText),
@@ -1017,12 +1017,12 @@ class _CameraOcrTranslatorTabState extends State<CameraOcrTranslatorTab>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: const Color(0xFFF4F4F5),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.document_scanner_rounded,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF09090B),
                 size: 28,
               ),
             ),

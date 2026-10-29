@@ -134,7 +134,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: const [
-              Icon(Icons.fact_check_rounded, color: Color(0xFF059669)),
+              Icon(Icons.fact_check_rounded, color: Color(0xFF09090B)),
               SizedBox(width: 8),
               Text('Kiểm tra kỹ thuật (QC)'),
             ],
@@ -174,7 +174,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF059669),
+                backgroundColor: const Color(0xFF09090B),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -183,7 +183,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    backgroundColor: Color(0xFF059669),
+                    backgroundColor: Color(0xFF09090B),
                     content: Text('Thiết bị đã ĐẠT CHUẨN kiểm định kỹ thuật'),
                   ),
                 );
@@ -201,12 +201,12 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF059669)),
+          Icon(icon, size: 18, color: const Color(0xFF09090B)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(label, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
           ),
-          Text(result, style: const TextStyle(fontSize: 11.5, color: Color(0xFF059669), fontWeight: FontWeight.bold)),
+          Text(result, style: const TextStyle(fontSize: 11.5, color: Color(0xFF09090B), fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -233,7 +233,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0FDF4),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: _buildStaffAppBar(),
       body: IndexedStack(
         index: _currentIndex,
@@ -251,7 +251,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
 
   PreferredSizeWidget _buildStaffAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF064E3B),
+      backgroundColor: const Color(0xFF09090B),
       foregroundColor: Colors.white,
       elevation: 0,
       title: Row(
@@ -259,7 +259,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF059669),
+              color: const Color(0xFF09090B),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.engineering_rounded, color: Colors.white, size: 20),
@@ -284,7 +284,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                   'Bàn làm việc Vận hành & Kỹ thuật',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11, color: Color(0xFFA7F3D0)),
+                  style: TextStyle(fontSize: 11, color: Color(0xFFD4D4D8)),
                 ),
               ],
             ),
@@ -298,7 +298,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF10B981).withAlpha(40),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF34D399)),
+            border: Border.all(color: const Color(0xFFFFFFFF)),
           ),
           child: Row(
             children: [
@@ -306,7 +306,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _isOnDuty ? const Color(0xFF34D399) : Colors.amber,
+                  color: _isOnDuty ? const Color(0xFFFFFFFF) : Colors.amber,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -324,7 +324,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         ),
         IconButton(
           tooltip: 'Kết thúc ca',
-          icon: const Icon(Icons.logout_rounded, color: Color(0xFFA7F3D0)),
+          icon: const Icon(Icons.logout_rounded, color: Color(0xFFD4D4D8)),
           onPressed: _handleLogout,
         ),
       ],
@@ -341,7 +341,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF059669),
+        selectedItemColor: const Color(0xFF09090B),
         unselectedItemColor: const Color(0xFF64748B),
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5),
@@ -382,14 +382,14 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF064E3B), Color(0xFF047857)],
+              colors: [Color(0xFF09090B), Color(0xFF27272A)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF064E3B).withAlpha(40),
+                color: const Color(0xFF09090B).withAlpha(40),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -425,7 +425,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
               const SizedBox(height: 12),
               const Text(
                 'Mục tiêu ca trực hôm nay:',
-                style: TextStyle(color: Color(0xFFA7F3D0), fontSize: 12),
+                style: TextStyle(color: Color(0xFFD4D4D8), fontSize: 12),
               ),
               const SizedBox(height: 4),
               const Text(
@@ -446,7 +446,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 count: '${_qcStatusMap.length}',
                 unit: 'thiết bị',
                 icon: Icons.check_circle_outline_rounded,
-                color: const Color(0xFF059669),
+                color: const Color(0xFF09090B),
               ),
             ),
             const SizedBox(width: 12),
@@ -466,7 +466,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 count: '${_shiftTasks.where((t) => t['done'] == true).length}/${_shiftTasks.length}',
                 unit: 'đã xong',
                 icon: Icons.checklist_rounded,
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF27272A),
               ),
             ),
           ],
@@ -495,7 +495,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  Icon(Icons.format_list_bulleted_rounded, color: Color(0xFF059669), size: 20),
+                  Icon(Icons.format_list_bulleted_rounded, color: Color(0xFF09090B), size: 20),
                 ],
               ),
               const SizedBox(height: 12),
@@ -515,7 +515,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                       children: [
                         Icon(
                           isDone ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-                          color: isDone ? const Color(0xFF059669) : Colors.grey,
+                          color: isDone ? const Color(0xFF09090B) : Colors.grey,
                           size: 22,
                         ),
                         const SizedBox(width: 10),
@@ -596,7 +596,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         final devices = _deviceController.devices;
 
         if (_deviceController.isLoading && devices.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: Color(0xFF059669)));
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF09090B)));
         }
 
         return RefreshIndicator(
@@ -607,13 +607,13 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD1FAE5),
+                  color: const Color(0xFFF4F4F5),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFA7F3D0)),
+                  border: Border.all(color: const Color(0xFFD4D4D8)),
                 ),
                 child: Row(
                   children: const [
-                    Icon(Icons.biotech_rounded, color: Color(0xFF065F46), size: 28),
+                    Icon(Icons.biotech_rounded, color: Color(0xFF09090B), size: 28),
                     SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -622,7 +622,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                           Text(
                             'Trạm Kiểm Định Phần Cứng & An Toàn Trẻ Em',
                             style: TextStyle(
-                              color: Color(0xFF065F46),
+                              color: Color(0xFF09090B),
                               fontSize: 13.5,
                               fontWeight: FontWeight.bold,
                             ),
@@ -630,7 +630,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                           SizedBox(height: 2),
                           Text(
                             'Đánh giá cảm biến GPS, pin và bức xạ trước khi bàn giao cho phụ huynh.',
-                            style: TextStyle(color: Color(0xFF047857), fontSize: 11.5),
+                            style: TextStyle(color: Color(0xFF27272A), fontSize: 11.5),
                           ),
                         ],
                       ),
@@ -658,11 +658,11 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF0FDF4),
+                          color: const Color(0xFFFAFAFA),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFA7F3D0)),
+                          border: Border.all(color: const Color(0xFFD4D4D8)),
                         ),
-                        child: const Icon(Icons.devices_rounded, color: Color(0xFF059669), size: 22),
+                        child: const Icon(Icons.devices_rounded, color: Color(0xFF09090B), size: 22),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -683,7 +683,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
                                 color: isPassed
-                                    ? const Color(0xFFD1FAE5)
+                                    ? const Color(0xFFF4F4F5)
                                     : (isWarning ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9)),
                                 borderRadius: BorderRadius.circular(4),
                               ),
@@ -691,7 +691,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                                 status,
                                 style: TextStyle(
                                   color: isPassed
-                                      ? const Color(0xFF065F46)
+                                      ? const Color(0xFF09090B)
                                       : (isWarning ? const Color(0xFF92400E) : Colors.grey.shade700),
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -703,7 +703,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF059669),
+                          backgroundColor: const Color(0xFF09090B),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -741,7 +741,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 'Hàng đợi yêu cầu hỗ trợ khách hàng',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
-              Icon(Icons.live_help_rounded, color: Color(0xFF059669)),
+              Icon(Icons.live_help_rounded, color: Color(0xFF09090B)),
             ],
           ),
         ),
@@ -769,7 +769,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                       children: [
                         Text(
                           ticket['id'],
-                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF064E3B)),
+                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF09090B)),
                         ),
                         const SizedBox(width: 8),
                         Container(
@@ -808,14 +808,14 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                   children: [
                     Text(
                       'Trạng thái: ${ticket['status']}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF059669)),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF09090B)),
                     ),
                     Row(
                       children: [
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF059669),
-                            side: const BorderSide(color: Color(0xFF059669)),
+                            foregroundColor: const Color(0xFF09090B),
+                            side: const BorderSide(color: Color(0xFF09090B)),
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
@@ -831,7 +831,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF059669),
+                            backgroundColor: const Color(0xFF09090B),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -875,8 +875,8 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: const Color(0xFFD1FAE5),
-                child: const Icon(Icons.engineering_rounded, size: 30, color: Color(0xFF059669)),
+                backgroundColor: const Color(0xFFF4F4F5),
+                child: const Icon(Icons.engineering_rounded, size: 30, color: Color(0xFF09090B)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -896,13 +896,13 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD1FAE5),
+                        color: const Color(0xFFF4F4F5),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
                         'VAI TRÒ: NHÂN VIÊN VẬN HÀNH (STAFF)',
                         style: TextStyle(
-                          color: Color(0xFF065F46),
+                          color: Color(0xFF09090B),
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                         ),
@@ -929,7 +929,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _isOnDuty,
-              activeThumbColor: const Color(0xFF059669),
+              activeThumbColor: const Color(0xFF09090B),
               title: const Text('Trạng thái sẵn sàng nhận hỗ trợ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
               subtitle: Text(_isOnDuty ? 'Đang sẵn sàng kết nối Video Call & nhận phiếu' : 'Đang tạm nghỉ giải lao', style: const TextStyle(fontSize: 11.5)),
               onChanged: (val) {
@@ -969,7 +969,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
+                    backgroundColor: const Color(0xFF09090B),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
