@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/services/biometric_service.dart';
 import '../../../../core/settings/app_settings_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import 'edit_profile_screen.dart';
@@ -359,6 +360,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         );
                       }),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Sinh Trắc Học Phần Cứng
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.fingerprint_rounded, color: _settings.currentPrimaryDark, size: 22),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Sinh Trắc Học Máy (Samsung Galaxy Tab S9)',
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: textCol),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Kiểm tra cảm biến vân tay màn hình phần cứng trên máy tính bảng Samsung Galaxy Tab S9.',
+                      style: TextStyle(fontSize: 12, color: subCol),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _settings.currentPrimaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () async {
+                          final res = await BiometricHardwareService.instance.authenticateWithFingerprint(
+                            reason: 'Chạm ngón tay vào cảm biến vân tay trên Samsung Galaxy Tab S9 để kiểm tra',
+                          );
+                          if (!context.mounted) return;
+                          if (res.success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.green,
+                                content: Text('Cảm biến vân tay máy Samsung Galaxy Tab S9 hoạt động chuẩn xác 100%!'),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.orange,
+                                content: Text(res.errorMessage ?? 'Chưa xác thực được vân tay.'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.fingerprint_rounded, size: 18),
+                        label: const Text('Kiểm Tra Cảm Biến Vân Tay Máy', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
+                      ),
                     ),
                   ],
                 ),

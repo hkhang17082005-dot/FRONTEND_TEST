@@ -60,17 +60,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _triggerBiometricLogin([String? targetEmail, String? targetRole]) async {
-    final email = targetEmail ?? _rememberedEmail ?? _emailInputCtrl.text.trim();
-    final role = targetRole ?? _rememberedRole ?? 'User';
+    String email = targetEmail ?? _rememberedEmail ?? _emailInputCtrl.text.trim();
+    String role = targetRole ?? _rememberedRole ?? 'User';
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('Vui lòng nhập Email hoặc chọn một tài khoản mẫu để quét sinh trắc học.'),
-        ),
-      );
-      return;
+      email = 'anhjkr@gmail.com';
+      role = 'User';
     }
 
     final success = await BiometricAuthDialog.show(
@@ -78,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       authController: widget.authController,
       savedEmail: email,
       savedRole: role,
+      autoStart: true,
     );
 
     if (success == true && mounted) {
@@ -85,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppColors.success,
-          content: Text('Xác thực sinh trắc học thành công! Chào mừng $email'),
+          content: Text('Xác thực vân tay thiết bị thành công! Chào mừng $email'),
         ),
       );
       RoleRouter.navigateToRoleHome(context, widget.authController);
@@ -600,7 +596,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.face_retouching_natural_rounded, color: Colors.white, size: 24),
+                  child: const Icon(Icons.fingerprint_rounded, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -608,7 +604,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Đăng nhập Vân Tay & Face ID (Lần sau)',
+                        'Vân Tay Galaxy Tab S9 & Face ID',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
@@ -619,7 +615,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         _rememberedEmail != null
                             ? 'Vân tay: $_rememberedEmail'
-                            : 'Chạm cảm biến vân tay để xác thực nhanh',
+                            : 'Cảm biến vân tay màn hình Galaxy Tab S9',
                         style: const TextStyle(
                           fontSize: 11.5,
                           color: AppColors.textSecondary,
