@@ -5,6 +5,9 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../device/data/models/device_model.dart';
 import '../../../device/presentation/controllers/device_controller.dart';
+import '../../../order/presentation/screens/orders_screen.dart';
+import '../../../settings/presentation/screens/edit_profile_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../video_call/presentation/screens/video_call_screen.dart';
 import '../../../video_call/presentation/widgets/call_hub_widget.dart';
 
@@ -30,21 +33,25 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
 
   final List<Map<String, dynamic>> _dailyDuties = [
     {
+      'id': 1,
       'title': 'Kiểm tra tín hiệu định vị vệ tinh GPS & trạm phát sóng SafeZone',
       'tag': 'Hạ tầng GPS',
       'done': true,
     },
     {
+      'id': 2,
       'title': 'Đo kiểm bức xạ an toàn RF & dung lượng pin cho lô Kiddo Watch',
       'tag': 'Kiểm định QC',
       'done': false,
     },
     {
+      'id': 3,
       'title': 'Hướng dẫn phụ huynh bé Hoàng Khôi kích hoạt khóa màn hình giờ học',
       'tag': 'CSKH Phụ huynh',
       'done': true,
     },
     {
+      'id': 4,
       'title': 'Trực phòng gọi Video Call hỗ trợ kỹ thuật thiết bị trẻ em',
       'tag': 'Tổng đài LiveKit',
       'done': false,
@@ -98,7 +105,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       context: context,
       title: 'Kết thúc Ca trực Kỹ thuật',
       content: 'Bạn có chắc chắn muốn đăng xuất khỏi Bàn điều hành Nhân viên (STAFF)?',
-      confirmText: 'Kết thúc ca',
+      confirmText: 'Đăng xuất',
       isDestructive: true,
     );
     if (!confirmed || !mounted) return;
@@ -115,52 +122,44 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     );
   }
 
-  void _openQcModal(Device d) {
+  void _runQcCheck(Device device) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Row(
-          children: [
-            Icon(Icons.biotech_rounded, color: AppColors.primaryDark),
-            SizedBox(width: 8),
-            Expanded(child: Text('Phiếu Kiểm Định An Toàn Trẻ Em')),
-          ],
-        ),
+        title: Text('Kiểm Định QC: ${device.name}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(d.name, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
-            Text('Model: ${d.modelNumber ?? "KS-2026"} • Hãng: ${d.brand ?? "Chính hãng"}',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-            const Divider(height: 20),
-            _buildQcLine(Icons.gps_fixed_rounded, 'Sai số chip định vị GPS', '±2.8m (Chuẩn)'),
-            _buildQcLine(Icons.health_and_safety_rounded, 'Mức bức xạ sóng RF trẻ em', 'An toàn CE'),
-            _buildQcLine(Icons.battery_charging_full_rounded, 'Chu kỳ bảo vệ pin chống nóng', 'Đạt 100%'),
-            _buildQcLine(Icons.mic_rounded, 'Đàm thoại 2 chiều SOS', 'Rõ nét'),
+            _buildQcLine(Icons.wifi_tethering_rounded, 'Chỉ số bức xạ điện từ SAR:', '< 0.8 W/kg (Chuẩn an toàn)'),
+            _buildQcLine(Icons.battery_charging_full_rounded, 'Dung lượng pin thực tế:', 'Đạt chuẩn 100% dung lượng'),
+            _buildQcLine(Icons.gps_fixed_rounded, 'Độ trễ định vị GPS vệ tinh:', '±3 mét (Tuyệt vời)'),
+            _buildQcLine(Icons.security_rounded, 'Khóa màn hình phụ huynh:', 'Bảo mật 2 lớp an toàn'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              setState(() => _qcResultByDevice[d.id] = 'Cần hiệu chỉnh');
+              setState(() => _qcResultByDevice[device.id] = 'Chưa đạt - Cần hiệu chỉnh');
               Navigator.pop(ctx);
             },
-            child: const Text('Báo bảo trì', style: TextStyle(color: AppColors.error)),
+            child: const Text('Cần Hiệu Chỉnh', style: TextStyle(color: AppColors.error)),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
             onPressed: () {
-              setState(() => _qcResultByDevice[d.id] = 'Đạt chuẩn KidSafe');
+              setState(() => _qcResultByDevice[device.id] = 'Đạt chuẩn KidSafe');
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
+                  behavior: SnackBarBehavior.floating,
                   backgroundColor: AppColors.success,
-                  content: Text('Đã cấp tem Đạt chuẩn KidSafe cho "${d.name}"'),
+                  content: Text('Thiết bị "${device.name}" đã Đạt chuẩn kiểm định an toàn!'),
                 ),
               );
             },
-            child: const Text('Cấp Tem An Toàn'),
+            child: const Text('Phê Duyệt Đạt QC'),
           ),
         ],
       ),
@@ -181,10 +180,148 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     );
   }
 
+  // ================= CRUD CA TRỰC / CHECKLIST =================
+  void _openAddDutyDialog() {
+    final titleCtrl = TextEditingController();
+    String selectedTag = 'Kiểm định QC';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          title: const Text('Thêm Nhiệm Vụ Ca Trực', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Nội dung công việc *', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(
+                controller: titleCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(hintText: 'vd: Kiểm tra định vị GPS trạm khu vực Q.1'),
+              ),
+              const SizedBox(height: 12),
+              const Text('Phân loại công việc', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              DropdownButtonFormField<String>(
+                initialValue: selectedTag,
+                decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                items: ['Hạ tầng GPS', 'Kiểm định QC', 'CSKH Phụ huynh', 'Tổng đài LiveKit', 'Bảo trì hệ thống']
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (v) => setDialogState(() => selectedTag = v ?? 'Kiểm định QC'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: Colors.white),
+              onPressed: () {
+                final txt = titleCtrl.text.trim();
+                if (txt.isEmpty) return;
+                setState(() {
+                  _dailyDuties.add({
+                    'id': DateTime.now().millisecondsSinceEpoch,
+                    'title': txt,
+                    'tag': selectedTag,
+                    'done': false,
+                  });
+                });
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: AppColors.success,
+                    content: Text('Đã thêm nhiệm vụ mới vào ca trực!'),
+                  ),
+                );
+              },
+              child: const Text('Thêm'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openEditDutyDialog(Map<String, dynamic> item) {
+    final titleCtrl = TextEditingController(text: item['title']);
+    String selectedTag = item['tag'] ?? 'Kiểm định QC';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          title: const Text('Chỉnh Sửa Nhiệm Vụ', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Nội dung công việc', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: titleCtrl, maxLines: 2),
+              const SizedBox(height: 12),
+              const Text('Phân loại công việc', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              DropdownButtonFormField<String>(
+                initialValue: ['Hạ tầng GPS', 'Kiểm định QC', 'CSKH Phụ huynh', 'Tổng đài LiveKit', 'Bảo trì hệ thống'].contains(selectedTag) ? selectedTag : 'Kiểm định QC',
+                decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                items: ['Hạ tầng GPS', 'Kiểm định QC', 'CSKH Phụ huynh', 'Tổng đài LiveKit', 'Bảo trì hệ thống']
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (v) => setDialogState(() => selectedTag = v ?? 'Kiểm định QC'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: Colors.white),
+              onPressed: () {
+                final txt = titleCtrl.text.trim();
+                if (txt.isEmpty) return;
+                setState(() {
+                  item['title'] = txt;
+                  item['tag'] = selectedTag;
+                });
+                Navigator.pop(ctx);
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteDuty(Map<String, dynamic> item) async {
+    final ok = await ConfirmDialog.show(
+      context: context,
+      title: 'Xóa Nhiệm Vụ',
+      content: 'Bạn có chắc chắn muốn xóa "${item['title']}" khỏi ca trực?',
+      confirmText: 'Xóa',
+      isDestructive: true,
+    );
+    if (!ok || !mounted) return;
+
+    setState(() => _dailyDuties.remove(item));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.primaryDark,
+        content: Text('Đã xóa nhiệm vụ khỏi ca trực.'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.primaryDark,
         foregroundColor: Colors.white,
@@ -223,6 +360,18 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
             ),
           ),
           IconButton(
+            tooltip: 'Cài đặt giao diện & Cỡ chữ',
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SettingsScreen(authController: widget.authController),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.white),
             onPressed: _logoutStaff,
           ),
@@ -232,6 +381,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         index: _selectedTab,
         children: [
           _buildShiftOverviewTab(),
+          OrdersScreen(authController: widget.authController, isEmbedded: true),
           _buildHardwareQcTab(),
           CallHubWidget(authController: widget.authController),
           _buildParentSupportTicketsTab(),
@@ -246,6 +396,11 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
             icon: Icon(Icons.fact_check_outlined),
             selectedIcon: Icon(Icons.fact_check_rounded, color: AppColors.primaryDark),
             label: 'Ca Trực',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long_rounded, color: AppColors.primaryDark),
+            label: 'Đơn Hàng',
           ),
           NavigationDestination(
             icon: Icon(Icons.biotech_outlined),
@@ -309,17 +464,17 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Nhiệm vụ trọng tâm: Kiểm định an toàn bức xạ đồng hồ GPS & hỗ trợ phụ huynh cài đặt vùng an toàn cho bé.',
-                style: TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.35),
+                'Nhiệm vụ: Giám sát trạm SafeZone, kiểm định thiết bị trước khi gửi phụ huynh & Trực tổng đài LiveKit',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  _buildMiniStat('Đã kiểm định', '${_qcResultByDevice.length} máy'),
+                  _buildMiniStat('Đã hoàn tất', '$completedTasks / ${_dailyDuties.length} việc'),
                   const SizedBox(width: 10),
-                  _buildMiniStat('Phiếu phụ huynh', '${_parentTickets.length} phiếu'),
+                  _buildMiniStat('Phiếu CSKH', '${_parentTickets.length} yêu cầu'),
                   const SizedBox(width: 10),
-                  _buildMiniStat('Tiến độ ca', '$completedTasks/${_dailyDuties.length} việc'),
+                  _buildMiniStat('Trực SFU', _isReceivingCalls ? 'Sẵn sàng' : 'Tạm dừng'),
                 ],
               ),
             ],
@@ -327,6 +482,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         ),
         const SizedBox(height: 16),
 
+        // Checklist CRUD Section
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -337,27 +493,67 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Danh mục công việc kỹ thuật trong ca',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Danh mục công việc kỹ thuật trong ca',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary),
+                    tooltip: 'Thêm nhiệm vụ ca trực',
+                    onPressed: _openAddDutyDialog,
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 6),
               ..._dailyDuties.map((item) {
                 final done = item['done'] as bool;
-                return CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: AppColors.primary,
-                  value: done,
-                  title: Text(
-                    item['title'],
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      decoration: done ? TextDecoration.lineThrough : null,
-                    ),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    color: done ? AppColors.background : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderLight),
                   ),
-                  subtitle: Text(item['tag'], style: const TextStyle(fontSize: 11.5, color: AppColors.primaryDark)),
-                  onChanged: (v) => setState(() => item['done'] = v ?? false),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        activeColor: AppColors.primary,
+                        value: done,
+                        onChanged: (v) => setState(() => item['done'] = v ?? false),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['title'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                decoration: done ? TextDecoration.lineThrough : null,
+                                color: done ? AppColors.textSecondary : AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              item['tag'],
+                              style: const TextStyle(fontSize: 11, color: AppColors.primaryDark, fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.textSecondary),
+                        onPressed: () => _openEditDutyDialog(item),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                        onPressed: () => _deleteDuty(item),
+                      ),
+                    ],
+                  ),
                 );
               }),
             ],
@@ -378,7 +574,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(val, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15)),
+            Text(val, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14)),
             Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10.5)),
           ],
         ),
@@ -410,42 +606,61 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: passed ? AppColors.primary : AppColors.borderLight),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.primarySoft,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(Icons.verified_outlined, color: AppColors.primaryDark),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(d.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                          Text('Tồn kho: ${d.stockQuantity} • Độ tuổi: ${d.minAge}-${d.maxAge}',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          const SizedBox(height: 4),
-                          Text(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            d.name,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: passed ? AppColors.success.withAlpha(30) : AppColors.primarySoft,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
                             status,
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: passed ? AppColors.success : AppColors.accent,
+                              color: passed ? AppColors.success : AppColors.primaryDark,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: () => _openQcModal(d),
-                      child: const Text('Đo QC', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Model: ${d.modelNumber ?? "2026"} • Phù hợp độ tuổi: ${d.minAge}-${d.maxAge} tuổi • Tồn kho: ${d.stockQuantity}',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                    const Divider(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${d.price.toStringAsFixed(0)} đ',
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.primaryDark, fontSize: 14),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryDark,
+                            foregroundColor: Colors.white,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          icon: const Icon(Icons.speed_rounded, size: 16),
+                          label: const Text('Đo Kiểm An Toàn'),
+                          onPressed: () => _runQcCheck(d),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -461,55 +676,79 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _parentTickets.length,
-      itemBuilder: (context, index) {
-        final t = _parentTickets[index];
-        return Container(
+      itemBuilder: (context, idx) {
+        final t = _parentTickets[idx];
+        return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.borderLight),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(t['code'], style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
-                  Text(t['timeAgo'], style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text('${t['parentName']} • ${t['kidInfo']}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
-              const SizedBox(height: 4),
-              Text(t['problem'], style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-              const Divider(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Trạng thái: ${t['state']}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryDark)),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.videocam_rounded, size: 16),
-                    label: const Text('Gọi Hỗ Trợ Ngay', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    onPressed: () {
-                      final clean = t['code'].toString().replaceAll('#', '').toLowerCase();
-                      CallHubWidget.launchDirectCall(
-                        context: context,
-                        authController: widget.authController,
-                        roomName: 'support-$clean',
-                        description: 'Hỗ trợ ${t['parentName']}: ${t['problem']}',
-                        callType: CallType.support,
-                        isHost: true,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(t['code'], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: t['state'] == 'Đã hoàn tất' ? AppColors.success.withAlpha(25) : AppColors.primarySoft,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        t['state'],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: t['state'] == 'Đã hoàn tất' ? AppColors.success : AppColors.primaryDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(t['parentName'], style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                Text('${t['kidInfo']} • ${t['timeAgo']}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const SizedBox(height: 6),
+                Text(t['problem'], style: const TextStyle(fontSize: 13)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      label: const Text('Đánh dấu xong'),
+                      onPressed: () {
+                        setState(() => t['state'] = 'Đã hoàn tất');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: AppColors.success,
+                            content: Text('Đã cập nhật phiếu ${t['code']} thành Hoàn tất'),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: Colors.white),
+                      icon: const Icon(Icons.videocam_rounded, size: 16),
+                      label: const Text('Gọi Video Hỗ Trợ'),
+                      onPressed: () {
+                        CallHubWidget.launchDirectCall(
+                          context: context,
+                          authController: widget.authController,
+                          roomName: 'support-ticket-${t['code'].replaceAll('#', '')}',
+                          description: 'Hỗ trợ kỹ thuật trực tiếp cho ${t['parentName']}',
+                          callType: CallType.support,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -531,57 +770,58 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                user?.fullName ?? 'Hồng Hoàng Khang (Staff)',
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 4),
-              Text(user?.email ?? 'honghoangkhang.staff@gmail.com',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-              const Divider(height: 22),
+              Text(user?.fullName ?? 'Hồng Hoàng Khang (Staff)', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+              Text(user?.email ?? 'honghoangkhang.staff@gmail.com', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              const Divider(height: 20),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 activeThumbColor: AppColors.primary,
+                title: const Text('Sẵn sàng tiếp nhận cuộc gọi Video hỗ trợ phụ huynh', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
                 value: _isReceivingCalls,
-                title: const Text('Sẵn sàng nhận cuộc gọi SOS & Hỗ trợ kỹ thuật',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
                 onChanged: (v) => setState(() => _isReceivingCalls = v),
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _shiftNoteCtrl,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Ghi chú bàn giao ca kỹ thuật (số thiết bị đã đo QC, phiếu tồn)...',
-                ),
+              const Divider(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.manage_accounts_rounded, color: AppColors.primary),
+                title: const Text('Cập nhật Hồ sơ Cá nhân (Họ tên, SĐT)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditProfileScreen(authController: widget.authController),
+                    ),
+                  );
+                },
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        backgroundColor: AppColors.success,
-                        content: Text('Đã lưu biên bản bàn giao ca trực kỹ thuật!'),
-                      ),
-                    );
-                  },
-                  child: const Text('Lưu Báo Cáo Ca Trực'),
-                ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.palette_rounded, color: AppColors.accent),
+                title: const Text('Cài đặt Giao diện, Cỡ chữ & Chủ đề', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(authController: widget.authController),
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.error,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           icon: const Icon(Icons.logout_rounded),
-          label: const Text('Kết thúc ca & Đăng xuất', style: TextStyle(fontWeight: FontWeight.w800)),
+          label: const Text('Đăng Xuất Khỏi Trạm Kỹ Thuật'),
           onPressed: _logoutStaff,
         ),
       ],

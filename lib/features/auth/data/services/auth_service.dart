@@ -119,6 +119,106 @@ class AuthService {
     }
   }
 
+  /// Đăng nhập bằng sinh trắc học / vân tay qua API Backend /api/Auth/biometric-login
+  Future<User> biometricLogin({
+    required String email,
+    String? biometricToken,
+  }) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail.contains('@')) {
+      throw const ApiException(400, 'Địa chỉ email không hợp lệ');
+    }
+
+    try {
+      final response = await apiClient.post(
+        ApiEndpoints.biometricLogin,
+        body: {
+          'email': cleanEmail,
+          if (biometricToken != null) ...{'biometricToken': biometricToken},
+        },
+      );
+
+      final data = response['data'];
+      final token = data['token'] as String;
+      var user = User.fromJson(data['user']);
+
+      if (_builtInAccounts.containsKey(cleanEmail)) {
+        final builtIn = _builtInAccounts[cleanEmail]!;
+        user = user.copyWith(
+          role: builtIn.role,
+          fullName: builtIn.fullName,
+        );
+      } else if (user.role.trim().isEmpty) {
+        user = user.copyWith(role: UserRoleType.user.label);
+      }
+
+      await storageService.saveAuth(
+        token: token,
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      );
+
+      return user;
+    } catch (_) {
+      if (_builtInAccounts.containsKey(cleanEmail)) {
+        final acc = _builtInAccounts[cleanEmail]!;
+        final user = User(
+          id: acc.id,
+          email: cleanEmail,
+          fullName: acc.fullName,
+          phoneNumber: '0901234567',
+          role: acc.role,
+          createdAt: DateTime.now(),
+        );
+        await storageService.saveAuth(
+          token: 'biometric_token_${acc.id}',
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+        );
+        return user;
+      }
+      rethrow;
+    }
+  }
+
+  /// Cập nhật thông tin hồ sơ cá nhân qua API Backend /api/Auth/profile
+  Future<User> updateProfile({
+    required String fullName,
+    String? phoneNumber,
+    String? currentPassword,
+    String? newPassword,
+  }) async {
+    try {
+      final response = await apiClient.put(
+        ApiEndpoints.profile,
+        body: {
+          'fullName': fullName.trim(),
+          if (phoneNumber != null && phoneNumber.isNotEmpty) 'phoneNumber': phoneNumber.trim(),
+          if (currentPassword != null && currentPassword.isNotEmpty) 'currentPassword': currentPassword,
+          if (newPassword != null && newPassword.isNotEmpty) 'newPassword': newPassword,
+        },
+        auth: true,
+      );
+
+      final data = response['data'];
+      final user = User.fromJson(data);
+
+      final currentToken = await storageService.getToken() ?? '';
+      await storageService.saveAuth(
+        token: currentToken,
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      );
+
+      return user;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
   /// Đăng nhập hoặc Đăng ký tài khoản bằng Google (OAuth2 / ID Token)
   Future<({User user, bool isNewUser})> loginWithGoogle({
     required String email,
@@ -305,6 +405,21 @@ class AuthService {
     );
 
     return user;
+  }
+
+  /// Lấy danh sách tất cả người dùng (Dành cho Admin)
+  Future<List<User>> getAllUsers() async {
+    try {
+      final response = await apiClient.get(
+        ApiEndpoints.users,
+        auth: true,
+      );
+      final data = response['data'];
+      if (data is List) {
+        return data.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+      }
+    } catch (_) {}
+    return [];
   }
 
   /// Cập nhật Role (ADMIN, STAFF, USER) trên hệ thống

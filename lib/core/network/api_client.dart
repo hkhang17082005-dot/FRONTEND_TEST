@@ -129,6 +129,23 @@ class ApiClient {
     return _handleResponse(response);
   }
 
+  Future<dynamic> patch(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = false,
+  }) async {
+    final encodedBody = jsonEncode(body ?? {});
+    final response = await _sendWithFallback(
+      (targetBase, headers) => http.patch(
+        Uri.parse('$targetBase$path'),
+        headers: headers,
+        body: encodedBody,
+      ),
+      auth: auth,
+    );
+    return _handleResponse(response);
+  }
+
   Future<dynamic> delete(
     String path, {
     bool auth = false,

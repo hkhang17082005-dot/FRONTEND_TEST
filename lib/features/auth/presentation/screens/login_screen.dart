@@ -6,6 +6,7 @@ import '../../../../core/navigation/role_router.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/google_sign_in_button.dart';
 import '../controllers/auth_controller.dart';
+import '../widgets/biometric_auth_dialog.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -37,6 +38,59 @@ class _LoginScreenState extends State<LoginScreen> {
   Timer? _otpTimer;
   int _secondsLeft = 60;
   bool _allowResend = false;
+
+  String? _rememberedEmail;
+  String? _rememberedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedBiometrics();
+  }
+
+  Future<void> _loadSavedBiometrics() async {
+    final email = await widget.authController.storageService.getEmail();
+    final role = await widget.authController.storageService.getRole();
+    if (mounted && email != null && email.isNotEmpty) {
+      setState(() {
+        _rememberedEmail = email;
+        _rememberedRole = role;
+      });
+    }
+  }
+
+  Future<void> _triggerBiometricLogin([String? targetEmail, String? targetRole]) async {
+    final email = targetEmail ?? _rememberedEmail ?? _emailInputCtrl.text.trim();
+    final role = targetRole ?? _rememberedRole ?? 'User';
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Vui lòng nhập Email hoặc chọn một tài khoản mẫu để quét sinh trắc học.'),
+        ),
+      );
+      return;
+    }
+
+    final success = await BiometricAuthDialog.show(
+      context: context,
+      authController: widget.authController,
+      savedEmail: email,
+      savedRole: role,
+    );
+
+    if (success == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.success,
+          content: Text('Xác thực sinh trắc học thành công! Chào mừng $email'),
+        ),
+      );
+      RoleRouter.navigateToRoleHome(context, widget.authController);
+    }
+  }
 
   @override
   void dispose() {
@@ -82,9 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _fillDemoAccount(String email, String label) {
+    String role = 'User';
+    if (label.contains('STAFF')) role = 'Staff';
+    if (label.contains('ADMIN')) role = 'Admin';
     setState(() {
       _emailInputCtrl.text = email;
       _passInputCtrl.text = 'Anhhung1@';
+      _rememberedEmail = email;
+      _rememberedRole = role;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -240,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -514,6 +573,79 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Khối Đăng nhập Sinh trắc học (Face ID / Vân tay) cho lần đăng nhập sau
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withAlpha(20),
+                  AppColors.primarySoft,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.primary.withAlpha(80)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.face_retouching_natural_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Đăng nhập Vân Tay & Face ID (Lần sau)',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _rememberedEmail != null
+                            ? 'Vân tay: $_rememberedEmail'
+                            : 'Chạm cảm biến vân tay để xác thực nhanh',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () => _triggerBiometricLogin(),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.fingerprint_rounded, size: 16),
+                      SizedBox(width: 4),
+                      Text('Quét vân tay', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
               ],
             ),

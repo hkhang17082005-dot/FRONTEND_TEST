@@ -5,9 +5,15 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../device/data/models/device_model.dart';
 import '../../../device/presentation/controllers/device_controller.dart';
+import '../../../order/presentation/controllers/order_controller.dart';
+import '../../../order/presentation/screens/orders_screen.dart';
+import '../../../order/presentation/widgets/create_order_dialog.dart';
+import '../../../review/presentation/widgets/device_reviews_sheet.dart';
 import '../../../translator/presentation/screens/smart_translator_screen.dart';
 import '../../../video_call/presentation/screens/video_call_screen.dart';
 import '../../../video_call/presentation/widgets/call_hub_widget.dart';
+import '../../../settings/presentation/screens/edit_profile_screen.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   final AuthController authController;
@@ -24,6 +30,7 @@ class UserHomeScreen extends StatefulWidget {
 class _UserHomeScreenState extends State<UserHomeScreen> {
   int _activeTab = 0;
   final DeviceController _deviceController = DeviceController();
+  final OrderController _orderController = OrderController();
   final TextEditingController _searchCtrl = TextEditingController();
 
   String _activeCategory = 'Tất cả';
@@ -35,6 +42,179 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   bool _bedtimeAutoLock = true;
   bool _safeZoneAlert = true;
   double _dailyScreenLimitMinutes = 90;
+
+  final List<Map<String, dynamic>> _myMonitoredDevices = [
+    {
+      'id': 1,
+      'childName': 'Bé Hoàng Khôi',
+      'gradeInfo': '8 tuổi • Lớp 3A Trường Chu Văn An',
+      'deviceTitle': 'Đồng Hồ Định Vị GPS Kiddo Watch Pro',
+      'addressText': 'Khuôn viên Trường Tiểu học Chu Văn An (Bán kính an toàn 150m)',
+      'batteryPercent': 88,
+      'usedMinutes': 35,
+      'accentColor': AppColors.primary,
+    },
+    {
+      'id': 2,
+      'childName': 'Bé Bảo Ngọc',
+      'gradeInfo': '5 tuổi • Lớp Lá Mầm Non Hoa Mai',
+      'deviceTitle': 'Máy Tính Bảng Học Tập Samsung Kids Tab',
+      'addressText': 'Nhà riêng Gia đình (Phòng học tầng 2 - Đang bật Chế độ Học tập)',
+      'batteryPercent': 94,
+      'usedMinutes': 20,
+      'accentColor': const Color(0xFF27272A),
+    },
+  ];
+
+  void _openAddChildDeviceDialog() {
+    final nameCtrl = TextEditingController();
+    final gradeCtrl = TextEditingController();
+    final deviceTitleCtrl = TextEditingController(text: 'Đồng hồ định vị GPS');
+    final addressCtrl = TextEditingController(text: 'Nhà riêng & Trường học');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: const Text('Thêm Thiết Bị Của Bé', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Tên của bé *', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: nameCtrl, decoration: const InputDecoration(hintText: 'vd: Bé Minh Khang')),
+              const SizedBox(height: 10),
+              const Text('Tuổi & Lớp học *', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: gradeCtrl, decoration: const InputDecoration(hintText: 'vd: 7 tuổi • Lớp 2')),
+              const SizedBox(height: 10),
+              const Text('Tên thiết bị bé dùng *', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: deviceTitleCtrl, decoration: const InputDecoration(hintText: 'vd: Kiddo Watch Pro')),
+              const SizedBox(height: 10),
+              const Text('Vùng an toàn SafeZone', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: addressCtrl, decoration: const InputDecoration(hintText: 'vd: Bán kính 100m quanh trường')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: Colors.white),
+            onPressed: () {
+              final n = nameCtrl.text.trim();
+              if (n.isEmpty) return;
+              setState(() {
+                _myMonitoredDevices.add({
+                  'id': DateTime.now().millisecondsSinceEpoch,
+                  'childName': n,
+                  'gradeInfo': gradeCtrl.text.trim().isEmpty ? 'Học sinh' : gradeCtrl.text.trim(),
+                  'deviceTitle': deviceTitleCtrl.text.trim().isEmpty ? 'Điện thoại thông minh' : deviceTitleCtrl.text.trim(),
+                  'addressText': addressCtrl.text.trim().isEmpty ? 'Vùng an toàn mặc định' : addressCtrl.text.trim(),
+                  'batteryPercent': 100,
+                  'usedMinutes': 0,
+                  'accentColor': AppColors.primary,
+                });
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.success,
+                  content: Text('Đã liên kết thiết bị mới cho $n!'),
+                ),
+              );
+            },
+            child: const Text('Thêm Thiết Bị'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openEditChildDeviceDialog(Map<String, dynamic> item) {
+    final nameCtrl = TextEditingController(text: item['childName']);
+    final gradeCtrl = TextEditingController(text: item['gradeInfo']);
+    final deviceTitleCtrl = TextEditingController(text: item['deviceTitle']);
+    final addressCtrl = TextEditingController(text: item['addressText']);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: const Text('Chỉnh Sửa Thiết Bị Của Bé', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Tên của bé', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: nameCtrl),
+              const SizedBox(height: 10),
+              const Text('Tuổi & Lớp', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: gradeCtrl),
+              const SizedBox(height: 10),
+              const Text('Thiết bị', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: deviceTitleCtrl),
+              const SizedBox(height: 10),
+              const Text('Vùng an toàn', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+              const SizedBox(height: 4),
+              TextField(controller: addressCtrl),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: Colors.white),
+            onPressed: () {
+              setState(() {
+                item['childName'] = nameCtrl.text.trim();
+                item['gradeInfo'] = gradeCtrl.text.trim();
+                item['deviceTitle'] = deviceTitleCtrl.text.trim();
+                item['addressText'] = addressCtrl.text.trim();
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.success,
+                  content: Text('Đã cập nhật thông tin thiết bị!'),
+                ),
+              );
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteChildDevice(Map<String, dynamic> item) async {
+    final ok = await ConfirmDialog.show(
+      context: context,
+      title: 'Hủy Liên Kết Thiết Bị',
+      content: 'Bạn có chắc muốn hủy kết nối thiết bị của "${item['childName']}" khỏi tài khoản?',
+      confirmText: 'Hủy liên kết',
+      isDestructive: true,
+    );
+    if (!ok || !mounted) return;
+
+    setState(() => _myMonitoredDevices.remove(item));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.primaryDark,
+        content: Text('Đã hủy liên kết thiết bị của "${item['childName']}"'),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -72,7 +252,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildFamilyAppBar(),
       body: IndexedStack(
         index: _activeTab,
@@ -164,6 +344,30 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ],
       ),
       actions: [
+        IconButton(
+          tooltip: 'Cài đặt Giao diện & Cỡ chữ',
+          icon: const Icon(Icons.settings_outlined, color: AppColors.primaryDark),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SettingsScreen(authController: widget.authController),
+              ),
+            );
+          },
+        ),
+        IconButton(
+          tooltip: 'Đơn Hàng & Gói Thiết Bị',
+          icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primaryDark),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => OrdersScreen(authController: widget.authController),
+              ),
+            );
+          },
+        ),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 12),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -359,37 +563,60 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ),
         const SizedBox(height: 18),
 
-        const Text(
-          'DANH SÁCH THIẾT BỊ CỦA BÉ ĐANG KẾT NỐI',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
-            color: AppColors.textSecondary,
-            letterSpacing: 0.8,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'DANH SÁCH THIẾT BỊ CỦA BÉ ĐANG KẾT NỐI',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.8,
+              ),
+            ),
+            TextButton.icon(
+              icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
+              label: const Text('Thêm Thiết Bị Của Bé', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+              onPressed: _openAddChildDeviceDialog,
+            ),
+          ],
         ),
         const SizedBox(height: 10),
 
-        _buildChildDeviceStatusCard(
-          childName: 'Bé Hoàng Khôi',
-          gradeInfo: '8 tuổi • Lớp 3A Trường Chu Văn An',
-          deviceTitle: 'Đồng Hồ Định Vị GPS Kiddo Watch Pro',
-          addressText: 'Khuôn viên Trường Tiểu học Chu Văn An (Bán kính an toàn 150m)',
-          batteryPercent: 88,
-          screenUsedText: 'Đã dùng 35 / ${_dailyScreenLimitMinutes.toInt()} phút hôm nay',
-          accentColor: AppColors.primary,
-        ),
-        const SizedBox(height: 14),
+        if (_myMonitoredDevices.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: const Center(
+              child: Text(
+                'Chưa có thiết bị nào được liên kết. Hãy bấm "Thêm Thiết Bị Của Bé" để bảo vệ bé ngay!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            ),
+          )
+        else
+          ..._myMonitoredDevices.map((dev) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _buildChildDeviceStatusCard(
+                deviceItem: dev,
+                childName: dev['childName'],
+                gradeInfo: dev['gradeInfo'],
+                deviceTitle: dev['deviceTitle'],
+                addressText: dev['addressText'],
+                batteryPercent: dev['batteryPercent'] as int,
+                screenUsedText: 'Đã dùng ${dev['usedMinutes']} / ${_dailyScreenLimitMinutes.toInt()} phút hôm nay',
+                accentColor: dev['accentColor'] as Color,
+              ),
+            );
+          }),
 
-        _buildChildDeviceStatusCard(
-          childName: 'Bé Bảo Ngọc',
-          gradeInfo: '5 tuổi • Lớp Lá Mầm Non Hoa Mai',
-          deviceTitle: 'Máy Tính Bảng Học Tập Samsung Kids Tab',
-          addressText: 'Nhà riêng Gia đình (Phòng học tầng 2 - Đang bật Chế độ Học tập)',
-          batteryPercent: 94,
-          screenUsedText: 'Đã dùng 20 / ${_dailyScreenLimitMinutes.toInt()} phút hôm nay',
-          accentColor: const Color(0xFF27272A),
-        ),
         const SizedBox(height: 16),
 
         // Quick AI Study Card
@@ -399,6 +626,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildChildDeviceStatusCard({
+    required Map<String, dynamic> deviceItem,
     required String childName,
     required String gradeInfo,
     required String deviceTitle,
@@ -448,7 +676,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(20),
@@ -460,13 +688,23 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     Text(
                       '$batteryPercent%',
                       style: const TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryDark,
                       ),
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.textSecondary),
+                tooltip: 'Sửa thiết bị',
+                onPressed: () => _openEditChildDeviceDialog(deviceItem),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                tooltip: 'Hủy kết nối',
+                onPressed: () => _confirmDeleteChildDevice(deviceItem),
               ),
             ],
           ),
@@ -966,26 +1204,59 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const Text('Giá thiết bị:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                   Text(
                     '${device.price.toStringAsFixed(0)} VNĐ',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w900,
                       color: AppColors.primaryDark,
                     ),
                   ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add_link_rounded),
-                    label: const Text('Đăng ký Trang bị cho Bé'),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: AppColors.primaryDark,
-                          content: Text('Đã gửi yêu cầu trang bị "${device.name}" cho bé!'),
-                        ),
-                      );
-                    },
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.star_half_rounded, color: Color(0xFFF59E0B), size: 18),
+                      label: const Text('Đánh Giá & Nhận Xét', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        DeviceReviewsSheet.show(
+                          context: context,
+                          device: device,
+                          authController: widget.authController,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryDark,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                      label: const Text('Đặt Mua / Trang Bị', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        CreateOrderDialog.show(
+                          context: context,
+                          device: device,
+                          authController: widget.authController,
+                          orderController: _orderController,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -1056,6 +1327,92 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Cài Đặt Ứng Dụng & Hồ Sơ Cá Nhân',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5),
+              ),
+              const SizedBox(height: 6),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.manage_accounts_rounded, color: AppColors.primary),
+                title: const Text('Cập nhật hồ sơ cá nhân (Họ tên, SĐT)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                subtitle: const Text('Thay đổi thông tin liên lạc và mật khẩu bảo mật', style: TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditProfileScreen(authController: widget.authController),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.palette_rounded, color: AppColors.accent),
+                title: const Text('Cài đặt hiển thị (Cỡ chữ, Màu nền, Dark Mode)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                subtitle: const Text('Tùy chỉnh độ lớn chữ đọc và tông màu chủ đề ưa thích', style: TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(authController: widget.authController),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Quản Lý Đơn Hàng & Gói Thiết Bị',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5),
+              ),
+              const SizedBox(height: 6),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
+                title: const Text('Xem danh sách đơn hàng & trạng thái kích hoạt', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                subtitle: const Text('Theo dõi tiến độ giao thiết bị, hủy đơn hoặc cấu hình', style: TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OrdersScreen(authController: widget.authController),
+                    ),
+                  );
+                },
               ),
             ],
           ),

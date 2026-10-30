@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../settings/app_settings_controller.dart';
 
 class AppColors {
   // Bảng màu Trắng - Đen Tối Giản (Minimalist Monochrome Black & White)
@@ -7,7 +8,7 @@ class AppColors {
   static const Color primaryLight = Color(0xFF27272A); // Xám đen (Zinc 800)
   static const Color primarySoft = Color(0xFFF4F4F5); // Trắng xám nhẹ (Zinc 100)
   static const Color accent = Color(0xFF3F3F46); // Xám chì (Zinc 700)
-  static const Color background = Color(0xFFFAFAFA); // Trắng tối giản
+  static Color get background => AppSettingsController.instance.currentBackgroundColor; // Nền toàn bộ ứng dụng
   static const Color surface = Colors.white;
   static const Color inputFill = Color(0xFFF4F4F5);
   static const Color textPrimary = Color(0xFF09090B);

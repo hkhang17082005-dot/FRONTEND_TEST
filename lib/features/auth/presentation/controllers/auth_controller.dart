@@ -252,6 +252,100 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  /// Lấy danh sách tất cả tài khoản trong hệ thống (Admin)
+  Future<List<User>> loadAllUsers() async {
+    try {
+      return await authService.getAllUsers();
+    } catch (e) {
+      errorMessage = _cleanErrorMessage(e.toString());
+      return [];
+    }
+  }
+
+  /// Cập nhật Role cho người dùng
+  Future<bool> updateUserRole(int userId, UserRoleType role) async {
+    try {
+      final updated = await authService.updateUserRole(userId: userId, role: role);
+      if (updated != null && currentUser?.id == userId) {
+        currentUser = updated;
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = _cleanErrorMessage(e.toString());
+      return false;
+    }
+  }
+
+  /// Đăng nhập bằng Vân Tay / Sinh trắc học kết nối API Backend /api/Auth/biometric-login
+  Future<bool> loginWithBiometrics({
+    required String email,
+    String? role,
+    String? biometricToken,
+  }) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await authService.biometricLogin(
+        email: email,
+        biometricToken: biometricToken,
+      );
+      currentUser = user;
+      return true;
+    } catch (e) {
+      errorMessage = _cleanErrorMessage(e.toString());
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Cập nhật hồ sơ cá nhân của người dùng hiện tại qua API Backend /api/Auth/profile
+  Future<bool> updateCurrentUserProfile({
+    String? fullName,
+    String? phoneNumber,
+    String? currentPassword,
+    String? newPassword,
+  }) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (fullName != null && fullName.isNotEmpty) {
+        final updatedUser = await authService.updateProfile(
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        );
+        currentUser = updatedUser;
+      }
+      return true;
+    } catch (_) {
+      if (currentUser != null && fullName != null) {
+        currentUser = currentUser!.copyWith(
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+        );
+        final token = await storageService.getToken() ?? '';
+        await storageService.saveAuth(
+          token: token,
+          userId: currentUser!.id,
+          email: currentUser!.email,
+          role: currentUser!.role,
+        );
+      }
+      return true;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _googleSignIn.signOut();

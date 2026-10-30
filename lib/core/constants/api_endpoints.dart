@@ -1,12 +1,14 @@
 class ApiEndpoints {
   // Auth endpoints
   static const String login = '/Auth/login';
+  static const String biometricLogin = '/Auth/biometric-login';
   static const String register = '/Auth/register';
   static const String googleAuth = '/Auth/google';
   static const String sendOtp = '/Auth/send-otp';
   static const String sendLoginOtp = '/Auth/send-login-otp';
   static const String verifyOtp = '/Auth/verify-otp';
   static const String me = '/Auth/me';
+  static const String profile = '/Auth/profile';
   static const String users = '/Auth/users';
   static String updateUserRole(int userId) => '/Auth/users/$userId/role';
 
@@ -14,7 +16,17 @@ class ApiEndpoints {
   static const String devices = '/Devices';
   static String deviceDetail(int id) => '/Devices/$id';
 
-  // Video Call endpoints (LiveKit - Chỉ dành cho User và Staff)
+  // Order endpoints
+  static const String orders = '/Orders';
+  static String orderDetail(int id) => '/Orders/$id';
+  static String orderStatus(int id) => '/Orders/$id/status';
+  static String orderCancel(int id) => '/Orders/$id/cancel';
+
+  // Review endpoints
+  static const String reviews = '/Reviews';
+  static String reviewDetail(int id) => '/Reviews/$id';
+
+  // Video Call endpoints (LiveKit - Dành cho Phụ huynh và Kỹ thuật viên)
   static const String videoCallRooms = '/VideoCall/rooms';
   static const String videoCallCreate = '/VideoCall/create-room';
   static const String videoCallJoin = '/VideoCall/join';
