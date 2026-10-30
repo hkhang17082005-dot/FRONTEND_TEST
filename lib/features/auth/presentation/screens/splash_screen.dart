@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/navigation/role_router.dart';
 import '../controllers/auth_controller.dart';
 import 'login_screen.dart';
 
@@ -25,24 +24,20 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _bootstrapSession() async {
-    final results = await Future.wait([
+    await Future.wait([
       widget.authController.checkInitialSession(),
       Future.delayed(const Duration(milliseconds: 900)),
     ]);
 
-    final hasSession = results[0] as bool;
     if (!mounted) return;
 
-    if (hasSession) {
-      RoleRouter.navigateToRoleHome(context, widget.authController);
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LoginScreen(authController: widget.authController),
-        ),
-      );
-    }
+    // Chuyển về màn hình Đăng nhập để người dùng chủ động chọn đăng nhập bằng Vân tay hoặc Mật khẩu
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(authController: widget.authController),
+      ),
+    );
   }
 
   @override
